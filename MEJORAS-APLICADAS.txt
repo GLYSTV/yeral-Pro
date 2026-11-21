@@ -55,3 +55,13 @@ Celular Android, Google TV y TV box (esta revisión):
 - Celular en vertical: menú en 2 columnas y botones de 44 px. Pantallas grandes (TV): letras, carátulas y marco de foco más grandes para el control remoto.
 - No cambió la lógica de la app (login, listas, reproductores).
 - No se pudo compilar aquí (sin Internet): compilar con GitHub Actions (build.yml) y probar en celular y TV.
+
+
+YERAL-Pro Premium Blue & Gold (21-11-2026):
+- Identidad visual unificada azul eléctrico, azul noche, cian y detalles dorados.
+- Intro de arranque actualizado a la nueva paleta.
+- Icono de aplicación renovado y banner Android TV panorámico renovado.
+- Logo gráfico renovado; pantalla de entrada y página de emparejamiento remoto adaptadas.
+- Se conservan los flujos existentes de listas M3U/Xtream, QR, ID de dispositivo, perfiles, favoritos, Mi lista, Continuar viendo, filtros, fichas, recomendaciones y reproductor.
+- Se mantienen las claves/valores internos y la configuración de emparejamiento QR existentes.
+- No se ha cambiado la lógica de acceso ni el formato de las listas.
