@@ -478,14 +478,14 @@ public class NativePlayerPlugin extends Plugin {
     android.graphics.drawable.GradientDrawable g = new android.graphics.drawable.GradientDrawable();
     g.setCornerRadius(26);
     if (focus) {
-      g.setColor(Color.rgb(112, 40, 245));
+      g.setColor(Color.rgb(123, 77, 255));
       g.setStroke(4, Color.WHITE);
     } else if (hl) {
-      g.setColor(Color.rgb(63, 24, 135));
-      g.setStroke(2, Color.rgb(163, 76, 255));
+      g.setColor(Color.rgb(42, 31, 102));
+      g.setStroke(2, Color.rgb(34, 211, 238));
     } else {
-      g.setColor(Color.argb(215, 14, 22, 34));
-      g.setStroke(2, Color.argb(150, 112, 76, 170));
+      g.setColor(Color.argb(215, 20, 17, 47));
+      g.setStroke(2, Color.argb(150, 123, 100, 210));
     }
     return g;
   }
@@ -723,7 +723,7 @@ public class PlayerActivity extends Activity {
   private String firstInfo = "";
   private final Runnable clear = () -> status.setText("");
 
-  private static final int ACCENT = Color.rgb(112, 40, 245);
+  private static final int ACCENT = Color.rgb(123, 77, 255);
   private long t0 = 0;
   private String retryInfo = "";
   private int nRetries = 0;
@@ -991,7 +991,7 @@ public class PlayerActivity extends Activity {
     z.setFocusable(true);
     z.setClickable(true);
     z.setOnFocusChangeListener((view, f) ->
-        z.setBackgroundColor(f ? Color.argb(120, 112, 40, 245) : Color.TRANSPARENT));
+        z.setBackgroundColor(f ? Color.argb(120, 123, 77, 255) : Color.TRANSPARENT));
     z.setOnClickListener(view -> {
       aspectMode = (aspectMode + 1) % ASP.length;
       pv.setResizeMode(aspectMode == 1 ? AspectRatioFrameLayout.RESIZE_MODE_ZOOM
@@ -1042,7 +1042,7 @@ public class PlayerActivity extends Activity {
     float dn = getResources().getDisplayMetrics().density;
     epgBox = new android.widget.LinearLayout(this);
     epgBox.setOrientation(android.widget.LinearLayout.VERTICAL);
-    epgBox.setBackgroundColor(Color.argb(220, 11, 9, 21));
+    epgBox.setBackgroundColor(Color.argb(220, 12, 10, 30));
     epgBox.setPadding((int) (20 * dn), (int) (12 * dn), (int) (20 * dn), (int) (12 * dn));
     epgBox.setFocusable(false);
     android.graphics.Typeface tf = null;
@@ -1405,7 +1405,7 @@ public class PlayerActivity extends Activity {
     b.setFocusable(true);
     b.setClickable(true);
     b.setOnFocusChangeListener((view, f) ->
-        b.setBackgroundColor(f ? Color.argb(120, 112, 40, 245) : Color.TRANSPARENT));
+        b.setBackgroundColor(f ? Color.argb(120, 123, 77, 255) : Color.TRANSPARENT));
     return b;
   }
 
@@ -1469,7 +1469,7 @@ public class PlayerActivity extends Activity {
       float dn = getResources().getDisplayMetrics().density;
       android.widget.LinearLayout col = new android.widget.LinearLayout(c);
       col.setOrientation(android.widget.LinearLayout.VERTICAL);
-      col.setBackgroundColor(Color.rgb(11, 9, 21));
+      col.setBackgroundColor(Color.rgb(12, 10, 30));
       TextView h = new TextView(c);
       h.setText(title.toUpperCase());
       h.setTextColor(ACCENT);
@@ -1477,7 +1477,7 @@ public class PlayerActivity extends Activity {
       h.setPadding((int) (20 * dn), (int) (18 * dn), (int) (20 * dn), (int) (12 * dn));
       col.addView(h);
       View line = new View(c);
-      line.setBackgroundColor(Color.rgb(112, 40, 245));
+      line.setBackgroundColor(Color.rgb(123, 77, 255));
       col.addView(line, new android.widget.LinearLayout.LayoutParams(-1, (int) (2 * dn)));
       android.widget.LinearLayout box = new android.widget.LinearLayout(c);
       box.setOrientation(android.widget.LinearLayout.VERTICAL);
@@ -1495,7 +1495,7 @@ public class PlayerActivity extends Activity {
         t.setFocusable(true);
         t.setClickable(true);
         t.setOnFocusChangeListener((view, f) ->
-            t.setBackgroundColor(f ? Color.rgb(112, 40, 245) : Color.TRANSPARENT));
+            t.setBackgroundColor(f ? Color.rgb(123, 77, 255) : Color.TRANSPARENT));
         t.setOnClickListener(view -> { dlg.dismiss(); if (l != null) l.onClick(dlg, w); });
         box.addView(t);
         if (first == null) first = t;
@@ -2109,7 +2109,7 @@ import java.util.ArrayList;
  * y la app sigue funcionando con normalidad.
  */
 public class AltPlayerActivity extends Activity implements SurfaceHolder.Callback {
-  private static final int ACCENT = Color.rgb(112, 40, 245);
+  private static final int ACCENT = Color.rgb(123, 77, 255);
   private static final String UA = "VLC/3.0.18 LibVLC/3.0.18";
   private static final long TIMEOUT_MS = 22000;
   private static final Object MPV_LOCK = new Object();
@@ -2314,7 +2314,7 @@ public class AltPlayerActivity extends Activity implements SurfaceHolder.Callbac
 
     tStatus = mkText(18, Color.WHITE);
     tStatus.setGravity(Gravity.CENTER);
-    tStatus.setBackgroundColor(Color.argb(190, 11, 9, 21));
+    tStatus.setBackgroundColor(Color.argb(190, 12, 10, 30));
     tStatus.setPadding((int) (22 * dn), (int) (14 * dn), (int) (22 * dn), (int) (14 * dn));
     FrameLayout.LayoutParams sp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
     sp.gravity = Gravity.CENTER;
@@ -2991,32 +2991,9 @@ public class RemoteSetupPlugin extends Plugin {
 }
 RSJAVA
 
-cat > android/app/src/main/assets/remote.html <<'RSHTML'
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>YERAL-Pro</title>
-<style>
-*{box-sizing:border-box}body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,#0a1260,#2a0e5a);font-family:system-ui,sans-serif;color:#fff;padding:16px}
-form{width:100%;max-width:420px;background:#0f1014;border:1px solid #343238;border-radius:18px;padding:26px 22px}
-h1{margin:0 0 4px;text-align:center;font-size:28px}h1 b{color:#e6bd58}p{margin:0 0 18px;text-align:center;color:#bbb;font-size:15px}
-input[type=text],input[type=url],input[type=password]{width:100%;height:52px;margin-bottom:14px;border:1px solid #34343b;border-radius:10px;padding:0 14px;font-size:17px;color:#fff;background:#090a0d}
-label{display:block;margin:0 0 16px;font-size:15px;color:#ddd}
-button{width:100%;height:52px;border:0;border-radius:10px;background:linear-gradient(110deg,#c9000b,#f01824);color:#fff;font-size:17px;font-weight:700}
-#m{margin-top:14px;text-align:center;font-size:15px;min-height:20px}
-</style></head><body>
-<form id="f" autocomplete="off"><h1>GLYS<b>TV</b></h1><p>Escribe tus datos y se enviarán a la TV</p>
-<input name="s" type="url" placeholder="URL del servidor (http://...)" value="%%S%%" autocapitalize="off" autocorrect="off" required>
-<input name="u" type="text" placeholder="Usuario" autocapitalize="off" autocorrect="off" required>
-<input name="p" id="p" type="password" placeholder="Contraseña" autocapitalize="off" required>
-<label><input type="checkbox" id="sh"> Mostrar contraseña</label>
-<button id="b">ENVIAR A LA TV</button><div id="m"></div></form>
-<script>
-var f=document.getElementById('f'),m=document.getElementById('m'),b=document.getElementById('b');
-document.getElementById('sh').onchange=function(){document.getElementById('p').type=this.checked?'text':'password'};
-f.onsubmit=function(e){e.preventDefault();b.disabled=true;m.textContent='Enviando…';
-fetch('send'+location.search,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(new FormData(f)).toString()})
-.then(function(r){if(!r.ok)throw 0;m.textContent='✔ Enviado. Mira la TV.';m.style.color='#6fe08a'})
-.catch(function(){m.textContent='No se pudo enviar. Escanea el QR otra vez.';m.style.color='#ff8a8a';b.disabled=false})};
-</script></body></html>
-RSHTML
+# Página de emparejamiento (QR): se usa remote.html del repo, con la misma identidad visual YERAL-Pro
+mkdir -p android/app/src/main/assets
+cp remote.html android/app/src/main/assets/remote.html
 
 if [ -f logo.png ]; then
   python3 -c "import PIL" 2>/dev/null || python3 -m pip install --quiet pillow 2>/dev/null || python3 -m pip install --quiet --break-system-packages pillow 2>/dev/null || true
@@ -3072,7 +3049,27 @@ print('iconos ok')
 ICONS
 fi
 BGXML=android/app/src/main/res/values/ic_launcher_background.xml
-[ -f "$BGXML" ] && sed -i -E 's#(<color name="ic_launcher_background">)[^<]*(</color>)#\1\#030A14\2#' "$BGXML" || true
+[ -f "$BGXML" ] && sed -i -E 's#(<color name="ic_launcher_background">)[^<]*(</color>)#\1\#07051A\2#' "$BGXML" || true
+
+# Pantalla de arranque (splash), barra de estado y colores del tema Android con la misma paleta Aurora del intro
+python3 - <<'SPLASHPY' || echo "AVISO: no se pudo personalizar el splash"
+import glob
+from PIL import Image
+emb = Image.open('icono.png').convert('RGB')
+for f in glob.glob('android/app/src/main/res/drawable*/splash.png'):
+    try:
+        w, h = Image.open(f).size
+        im = Image.new('RGB', (w, h), (7, 5, 26))
+        k = int(min(w, h) * 0.30)
+        e = emb.resize((k, k), Image.LANCZOS)
+        im.paste(e, ((w - k) // 2, (h - k) // 2))
+        im.save(f)
+    except Exception as x:
+        print('splash omitido', f, x)
+print('splash ok')
+SPLASHPY
+COLXML=android/app/src/main/res/values/colors.xml
+[ -f "$COLXML" ] && sed -i -E 's#(<color name="colorPrimary">)[^<]*(</color>)#\1\#07051A\2#; s#(<color name="colorPrimaryDark">)[^<]*(</color>)#\1\#07051A\2#; s#(<color name="colorAccent">)[^<]*(</color>)#\1\#7B4DFF\2#' "$COLXML" || true
 
 sed -i 's#<application#<application android:usesCleartextTraffic="true"#' $MAN
 sed -i 's#</application>#    <activity android:name=".PlayerActivity" android:exported="false" android:configChanges="orientation|screenSize|keyboardHidden|screenLayout|smallestScreenSize" android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" />\n    </application>#' $MAN
@@ -3093,7 +3090,7 @@ TVPY
 
 python3 patch_tv.py .
 
-# Banner de Android TV con el logo azul neon (banner.png 640x360)
+# Banner de Android TV (banner.png, identidad Aurora)
 if [ -f banner.png ]; then
   RESB=android/app/src/main/res
   mkdir -p "$RESB/drawable-xhdpi" "$RESB/drawable-mdpi"

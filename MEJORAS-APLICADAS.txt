@@ -65,3 +65,16 @@ YERAL-Pro Premium Blue & Gold (21-11-2026):
 - Se conservan los flujos existentes de listas M3U/Xtream, QR, ID de dispositivo, perfiles, favoritos, Mi lista, Continuar viendo, filtros, fichas, recomendaciones y reproductor.
 - Se mantienen las claves/valores internos y la configuración de emparejamiento QR existentes.
 - No se ha cambiado la lógica de acceso ni el formato de las listas.
+
+
+YERAL-Pro AURORA (21-11-2026) — nuevo estilo unificado:
+- Una sola paleta, del intro a la última pestaña: tinta oscura (#06050f), violeta (#7b4dff) para marca y acciones, cian (#22d3ee) para foco/progreso, oro (#ffc247) para «Pro», favoritos y estrellas, y rojo solo para EN VIVO.
+- Icono nuevo: una «Y» (de YERAL) con un botón de play dorado dentro. Archivos: icono.png, icono.svg, banner.png (Android TV), logo.png y emblema/favicon dentro de index.html.
+- Intro nuevo: el emblema aparece con anillo animado, «YERAL-PRO» con insignia dorada, lema y barra de carga; respeta «reducir movimiento».
+- Todas las pantallas usan la misma paleta: entrada de listas, perfiles, inicio (menú lateral, destacado, canales, carruseles), TV en vivo / Películas / Series, ficha, selector de temporadas, reproductor (controles, barra, ajustes), configuración, buscador y avisos de actualización.
+- Foco para control remoto: aro cian muy visible en todos los botones y tarjetas.
+- Reproductor nativo ExoPlayer/VLC/MPV: el acento violeta y los fondos coinciden con la nueva paleta.
+- Splash de arranque de Android, barra de estado y fondo del WebView con el mismo color del intro (sin destello blanco/azul).
+- La página que se abre al escanear el QR (remote.html) ahora es YERAL-Pro con la misma paleta; antes la compilación copiaba una plantilla roja de GLYSTV.
+- Pequeñas correcciones: «Todos los canales» y «Visto recientemente» ya no se parten en 3 líneas; cabecera del inicio ajustada para celular vertical.
+- No cambió la lógica de la app (login, listas, QR, perfiles, favoritos, reproductores).
