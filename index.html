@@ -2092,6 +2092,8 @@ body{background:radial-gradient(1100px 520px at 85% -12%,rgba(47,140,255,.22),tr
 #yeralUpdateCard .yu-actions{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
 #yeralUpdateCard .yu-actions button,#yeralUpdateCard .yu-actions a{flex:1;text-align:center;border:0;border-radius:12px;padding:12px 14px;font-weight:800;text-decoration:none;cursor:pointer}
 #yeralUpdateCard .yu-download{background:linear-gradient(90deg,#7028f5,#a34cff);color:white}
+#yeralUpdateCard .yu-actions :focus,#yeralUpdateCard .yu-actions .tv-focus{outline:3px solid #fff;outline-offset:3px;transform:scale(1.04)}
+#yeralUpdateCard .yu-alt{font-size:12px;color:#9d90b8;margin:14px 0 0}#yeralUpdateCard .yu-alt b{color:#cfc1e6;word-break:break-all}
 #yeralUpdateCard .yu-later{background:#ffffff12;color:#eee;border:1px solid #ffffff20!important}
 
 .yu-settings{margin:14px 0 18px;padding:18px;border-radius:18px;background:linear-gradient(145deg,#15152b,#101a36);border:1px solid #334b7a;color:#f5f7ff}
@@ -2099,7 +2101,7 @@ body{background:radial-gradient(1100px 520px at 85% -12%,rgba(47,140,255,.22),tr
 .yu-check-button{width:100%;min-height:58px;border-radius:16px;border:2px solid #63d5ff;background:linear-gradient(100deg,#2165ed,#258fe9);color:#fff;font-size:19px;font-weight:800;box-shadow:0 0 0 4px #101a36,0 0 0 7px #59c9f3;cursor:pointer}
 .yu-check-status{font-size:14px;color:#e0e8ff;margin-top:15px;line-height:1.45}
 </style>
-<div id="yeralUpdateBox" role="dialog" aria-modal="true" aria-labelledby="yeralUpdateTitle"><div id="yeralUpdateCard"><h2 id="yeralUpdateTitle">YERAL-Pro · Actualización</h2><p id="yeralUpdateMsg"></p><div class="yu-actions"><a id="yeralUpdateDownload" class="yu-download" href="#" target="_blank" rel="noopener">Descargar APK</a><button type="button" id="yeralUpdateLater" class="yu-later">Más tarde</button></div></div></div>
+<div id="yeralUpdateBox" role="dialog" aria-modal="true" aria-labelledby="yeralUpdateTitle"><div id="yeralUpdateCard"><h2 id="yeralUpdateTitle">YERAL-Pro · Actualización</h2><p id="yeralUpdateMsg"></p><div class="yu-actions"><a id="yeralUpdateDownload" class="yu-download" href="#" role="button" tabindex="0">Descargar APK</a><button type="button" id="yeralUpdateLater" class="yu-later">Más tarde</button></div><p class="yu-alt">Si no se abre la descarga, usa Downloader o el navegador y entra a: <b>github.com/GLYSTV/yeral-Pro/releases/latest</b></p></div></div>
 <style id="yeral-grid-fix">
 /* Películas/Series: las filas de la cuadrícula se comprimían (tarjetas vacías). Cada fila ahora mide lo que mide su tarjeta. */
 #ls.grid{grid-auto-rows:max-content!important;align-content:start!important}
@@ -2118,14 +2120,15 @@ body{background:radial-gradient(1100px 520px at 85% -12%,rgba(47,140,255,.22),tr
   var YERAL_RELEASE_API='https://api.github.com/repos/GLYSTV/yeral-Pro/releases/latest';
   var yeralUpdateShown=false;
   function status(message){var el=document.getElementById('yuCheckStatus');if(el)el.textContent=message}
-  function closeUpdate(){var box=document.getElementById('yeralUpdateBox');if(box)box.classList.remove('show')}
+  var prevFocus=null;
+  function closeUpdate(){var box=document.getElementById('yeralUpdateBox');if(box)box.classList.remove('show');try{if(prevFocus&&prevFocus.isConnected)prevFocus.focus()}catch(e){}}
   function showUpdate(release,asset){
     if(yeralUpdateShown)return;yeralUpdateShown=true;
     var title=release.name||release.tag_name||'Nueva versión';
     var box=document.getElementById('yeralUpdateBox'),p=document.getElementById('yeralUpdateMsg'),a=document.getElementById('yeralUpdateDownload');
     if(!box||!p||!a)return;
     p.textContent='Hay una nueva versión de YERAL-Pro ('+title+'). Descarga la APK para actualizar. Android abrirá el instalador.';
-    a.href=asset.browser_download_url;a.setAttribute('download','YERAL-Pro.apk');box.classList.add('show');
+    a.href=asset.browser_download_url;a.setAttribute('data-url',asset.browser_download_url);prevFocus=document.activeElement;box.classList.add('show');setTimeout(function(){try{a.focus()}catch(e){}},80);
   }
   async function yeralCheckUpdate(manual){
     var btn=document.getElementById('yuCheckButton');if(btn){btn.disabled=true;btn.textContent='Buscando actualización…'}
@@ -2147,6 +2150,17 @@ body{background:radial-gradient(1100px 520px at 85% -12%,rgba(47,140,255,.22),tr
   var version=document.getElementById('yuInstalledVersion');if(version)version.textContent=YERAL_VERSION_LABEL;
   var check=document.getElementById('yuCheckButton');if(check)check.addEventListener('click',function(){yeralCheckUpdate(true)});
   var later=document.getElementById('yeralUpdateLater');if(later)later.addEventListener('click',closeUpdate);
+  var dl=document.getElementById('yeralUpdateDownload');
+  function openApk(u){try{var A=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.App;if(A&&A.openUrl){A.openUrl({url:u});return}}catch(e){}location.href=u}
+  if(dl)dl.addEventListener('click',function(e){e.preventDefault();var u=dl.getAttribute('data-url');if(u)openApk(u)});
+  /* Control remoto: flechas entre los dos botones, OK pulsa, Atrás cierra (captura: gana a la navegación de fondo) */
+  document.addEventListener('keydown',function(e){var bx=document.getElementById('yeralUpdateBox');if(!bx||!bx.classList.contains('show')||!dl||!later)return;
+    var k=e.key,c=e.keyCode,btns=[dl,later],i=btns.indexOf(document.activeElement);
+    var stop=function(){e.preventDefault();e.stopImmediatePropagation()};
+    if(c===4||c===461||k==='Escape'||k==='BrowserBack'||k==='GoBack'){stop();closeUpdate();return}
+    if(c>=37&&c<=40||/^Arrow/.test(k||'')){stop();var n=(c===39||c===40||k==='ArrowRight'||k==='ArrowDown')?1:-1;btns[((i<0?0:i)+n+2)%2].focus();return}
+    if(c===13||c===23||k==='Enter'||k===' '){stop();btns[i<0?0:i].click()}
+  },true);
   var box=document.getElementById('yeralUpdateBox');if(box)box.addEventListener('click',function(e){if(e.target===box)closeUpdate()});
   window.addEventListener('load',function(){setTimeout(function(){yeralCheckUpdate(false)},3500)});
 })();
