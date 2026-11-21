@@ -14,6 +14,9 @@ fi
 # logo.png solo se usa para generar los iconos; no se copia a www (pesa 1.4 MB y la web no lo usa)
 # hls.js en local para no depender del CDN en la TV (si falla, la app usa el CDN como respaldo)
 curl -fsSL --max-time 40 https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.8/hls.min.js -o www/hls.min.js || { rm -f www/hls.min.js; echo "AVISO: no se pudo descargar hls.js; se usará el CDN"; }
+# QR y emparejamiento en local (si falla, la app usa el CDN como respaldo)
+curl -fsSL --max-time 40 https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js -o www/qrcode.js || { rm -f www/qrcode.js; echo "AVISO: no se pudo descargar qrcode.js; se usará el CDN"; }
+curl -fsSL --max-time 40 https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js -o www/peerjs.min.js || { rm -f www/peerjs.min.js; echo "AVISO: no se pudo descargar peerjs; se usará el CDN"; }
 
 # Poppins local: se descarga en la compilación (GitHub tiene internet). Si falla, se mantiene Google Fonts.
 mkdir -p www/fonts
@@ -143,6 +146,36 @@ public class NativePlayerPlugin extends Plugin {
   static String[] chTitles = new String[0];
   static String[] chSids = new String[0];
 
+  // Temporizador de apagado global (reproductor integrado, ExoPlayer a pantalla completa y VLC/MPV)
+  static final android.os.Handler SLEEP_H = new android.os.Handler(android.os.Looper.getMainLooper());
+  static long sleepEnd = 0;
+  static android.app.Activity sleepTarget = null;
+  static final Runnable SLEEP_RUN = new Runnable() {
+    public void run() {
+      sleepEnd = 0;
+      try { if (sleepTarget != null) sleepTarget.finish(); } catch (Throwable t) { /* ignorar */ }
+      if (instance != null) instance.sleepStop();
+    }
+  };
+  static void sleepSet(int min) {
+    SLEEP_H.removeCallbacks(SLEEP_RUN);
+    if (min > 0) {
+      sleepEnd = System.currentTimeMillis() + min * 60000L;
+      SLEEP_H.postDelayed(SLEEP_RUN, min * 60000L);
+    } else {
+      sleepEnd = 0;
+    }
+  }
+  void sleepStop() {
+    try { if (player != null) player.pause(); } catch (Throwable t) { /* ignorar */ }
+    try { if (full) closeFull(); } catch (Throwable t) { /* ignorar */ }
+    try {
+      JSObject o = new JSObject();
+      o.put("done", true);
+      notifyListeners("sleep", o);
+    } catch (Throwable t) { /* ignorar */ }
+  }
+
   private ExoPlayer player;
   private PlayerView pview;
   private FrameLayout holder;
@@ -258,6 +291,22 @@ public class NativePlayerPlugin extends Plugin {
       setFull(on);
       call.resolve();
     });
+  }
+
+  @PluginMethod
+  public void setSleepTimer(final PluginCall call) {
+    Integer m = call.getInt("minutes", 0);
+    sleepSet(m == null ? 0 : m);
+    JSObject o = new JSObject();
+    o.put("end", sleepEnd);
+    call.resolve(o);
+  }
+
+  @PluginMethod
+  public void getSleepTimer(final PluginCall call) {
+    JSObject o = new JSObject();
+    o.put("end", sleepEnd);
+    call.resolve(o);
   }
 
   @PluginMethod
@@ -708,6 +757,7 @@ public class PlayerActivity extends Activity {
   @Override
   protected void onCreate(Bundle b) {
     super.onCreate(b);
+    NativePlayerPlugin.sleepTarget = this;
 
     getWindow().addFlags(
         WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -2015,6 +2065,7 @@ public class PlayerActivity extends Activity {
   @Override
   protected void onDestroy() {
     saveResume();
+    if (NativePlayerPlugin.sleepTarget == this) NativePlayerPlugin.sleepTarget = null;
     if (player != null) player.release();
     super.onDestroy();
     if (isFinishing()) NativePlayerPlugin.emitClosed();
@@ -2191,6 +2242,7 @@ public class AltPlayerActivity extends Activity implements SurfaceHolder.Callbac
   @Override
   protected void onCreate(Bundle b) {
     super.onCreate(b);
+    NativePlayerPlugin.sleepTarget = this;
     getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     getWindow().getDecorView().setSystemUiVisibility(
         View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
@@ -2728,6 +2780,7 @@ public class AltPlayerActivity extends Activity implements SurfaceHolder.Callbac
   @Override
   protected void onDestroy() {
     destroyed = true;
+    if (NativePlayerPlugin.sleepTarget == this) NativePlayerPlugin.sleepTarget = null;
     h.removeCallbacksAndMessages(null);
     releaseEngines();
     super.onDestroy();

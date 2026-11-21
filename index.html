@@ -678,6 +678,26 @@ body{background:radial-gradient(900px 520px at 14% -12%,rgba(112,40,245,.24),tra
 .dbtns{display:grid;grid-template-columns:1.5fr 1fr;gap:10px;margin-top:16px}
 .dbtns .btn{margin-top:0;border-radius:8px;text-transform:uppercase;font-size:12.5px;padding:14px 6px}.dbtns .btn{color:#fff}.dbtns .btn:not(.g){background:linear-gradient(90deg,var(--b),var(--b2))}.dbtns .btn.g{background:#2b2b30}
 @media(max-width:420px){.dbtns{grid-template-columns:1fr}}
+.chipz{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+</style>
+<style id="yeral-home-fix">
+/* ===== Inicio: menú lateral, cabecera compacta y botones ===== */
+html body #home:not(.hide){grid-template-columns:196px minmax(0,1fr)!important}
+html body #home .hd{padding:6px 14px!important;gap:8px!important;min-height:0!important}
+html body #home .hd .logo{font-size:19px!important;letter-spacing:.5px!important;margin-right:4px!important}
+html body #home .hd .logo::before{width:24px!important;height:24px!important}
+html body #home .hd .cl{font-size:20px!important;font-weight:600!important;flex-direction:row!important;align-items:baseline!important;gap:8px!important;margin-right:4px!important}
+html body #home .hd .cl::after{margin-top:0!important;font-size:10px!important}
+html body #home .hd .ib{width:38px!important;height:38px!important;min-width:0!important;padding:0!important}
+html body #home .hd .ib svg{width:18px;height:18px}
+html body #home #tiles .tile{display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:flex-start!important;text-align:left!important;gap:12px!important;min-height:52px!important;padding:8px 14px!important;white-space:nowrap}
+#home #tiles .tile .ti{flex:0 0 auto}
+#home #tiles .tile>div{flex:1;min-width:0;text-align:left}
+#home #tiles .tile b{display:block;font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#home #tiles .tile br,#home #tiles .tile small:empty{display:none}
+html body #home #tiles .tile[data-h=live]::after{content:""!important;top:50%!important;right:12px!important;transform:translateY(-50%);width:9px;height:9px;padding:0!important;font-size:0!important;border-radius:50%;background:#ff2d55!important;animation:yPulse 1.6s infinite}
+@keyframes yPulse{0%{box-shadow:0 0 0 0 rgba(255,45,85,.7)}70%{box-shadow:0 0 0 8px rgba(255,45,85,0)}100%{box-shadow:0 0 0 0 rgba(255,45,85,0)}}
+.mg-btn{width:38px;height:38px;border-radius:50%!important;padding:0!important;display:grid;place-items:center;font-size:17px}
 </style>
 </head>
 <body>
@@ -754,6 +774,7 @@ body{background:radial-gradient(900px 520px at 14% -12%,rgba(112,40,245,.24),tra
 <div class="opt"><b>Intervalo de salto</b><div class="chips" data-o="skip"><button class="chip" data-v="10">10 s</button><button class="chip" data-v="20">20 s</button><button class="chip" data-v="30">30 s</button></div></div>
 <div class="opt"><b>Relación de aspecto</b><div class="chips" data-o="asp"><button class="chip" data-v="0">Ajustar</button><button class="chip" data-v="1">Llenar</button><button class="chip" data-v="2">Estirar</button></div></div>
 <div class="opt"><b>Tamaño de subtítulos</b><div class="chips" data-o="cue"><button class="chip" data-v="80%">Pequeño</button><button class="chip" data-v="100%">Mediano</button><button class="chip" data-v="140%">Grande</button></div></div>
+<div class="opt"><b>Temporizador de apagado</b><div class="chipz" id="sleepChips"><button class="chip" data-m="0">Apagado</button><button class="chip" data-m="15">15 min</button><button class="chip" data-m="30">30 min</button><button class="chip" data-m="60">60 min</button><button class="chip" data-m="90">90 min</button></div><small id="sleepInfo" style="display:block;color:#aaa;margin-top:6px">Detiene la reproducción al terminar el tiempo.</small></div>
 <div class="row2"><button class="btn" id="poX">Listo</button></div></div></div>
 <div id="xo" class="mod hide"><div class="mp" style="max-width:520px"><h3 id="xoT"></h3><div id="xoB"></div><div class="row2"><button class="btn" id="xoX">Listo</button></div></div></div>
 <div id="tt" class="hide"></div>
@@ -943,10 +964,14 @@ return{newest:newest,series:series}}
 var HOME_ROWS={};
 function homeSection(title,row,items,empty,action){var a=(items||[]).slice(0,18);HOME_ROWS[row]=a;return '<section class="home-section"><div class="home-sec-head"><h3>'+title+'</h3><span class="sp"></span>'+(action?'<button type="button" data-home-action="'+action+'">Ver todo</button>':'')+'</div><div class="home-rail">'+(a.length?a.map(function(c,i){return homeCard(c,row,i)}).join(''):(HOME_BG.running?homeSkel():'<div class="home-empty">'+empty+'</div>'))+'</div></section>'}
 function homeAddedTime(c){var v=c&&c.added;if(v==null||v==='')return 0;var n=Number(v);if(isFinite(n)&&n>0)return n<1000000000000?n*1000:n;var d=Date.parse(v);return isNaN(d)?0:d}
+var RECV=[];
+function recentRow(){RECV=(S.rec||[]).filter(function(c){return !c.type||c.type=='live'}).slice(0,12);if(!RECV.length)return '';return '<section class="home-section"><div class="featured-head"><h3>'+ic('replay')+' Vistos recientemente</h3></div><div class="featured-rail">'+RECV.map(function(x,i){return '<button class="featured-card" type="button" data-rc="'+i+'">'+ic('tv')+'<span>'+esc(x.name||'')+'</span></button>'}).join('')+'</div></section>'}
+document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('[data-rc]');if(!b)return;var t=RECV[+b.getAttribute('data-rc')];if(!t)return;var c=null;S.chs.forEach(function(x){if(!c&&key(x)==key(t))c=x});if(!c){toast('No se encontró ese canal en tu lista');return}openBr('live').then(function(){play(c)})});
 function renderHomeRails(){var e=$('hch');if(!e)return;var d=homeRailsData(),newest=d.newest,series=d.series;
 var hero=newest.length?newest[0]:null;HOME_ROWS.hero=hero?[hero]:[];
 var h=hero?'<button class="home-hero" type="button" data-home-row="hero" data-home-i="0"><span class="home-hero-art">'+(hero.logo?'<img src="'+esc(hero.logo)+'" loading="lazy" decoding="async" alt="" onerror="this.style.display=\'none\'">':'')+'</span><span class="home-hero-shade"></span><span class="home-hero-copy"><small>DESTACADO EN YERAL-Pro</small><b>'+esc(hero.name)+'</b><span>Película'+(hero.year?' · '+esc(hero.year):'')+'</span><i>▶ &nbsp; Reproducir</i></span></button>':'';
-h+='<section class="home-section"><div class="featured-head"><h3>'+ic('tv')+' Canales</h3><span class="sp"></span><button type="button" data-home-action="manage-featured">⚙ Gestionar canales</button></div><div class="featured-rail">'+HCH.map(function(x,i){return '<button class="featured-card'+(hchFind(x)?'':' no')+'" type="button" data-hc="'+i+'">'+ic('tv')+'<span>'+esc(x.label||x.name)+'</span></button>'}).join('')+'</div></section>';
+h+='<section class="home-section"><div class="featured-head"><h3>'+ic('tv')+' Canales</h3><span class="sp"></span><button type="button" data-home-action="manage-featured" class="mg-btn" title="Gestionar canales" aria-label="Gestionar canales">⚙</button></div><div class="featured-rail">'+HCH.map(function(x,i){return '<button class="featured-card'+(hchFind(x)?'':' no')+'" type="button" data-hc="'+i+'">'+ic('tv')+'<span>'+esc(x.label||x.name)+'</span></button>'}).join('')+'</div></section>';
+h+=recentRow();
 h+=homeSection(ic('film')+' Películas · Recién añadidas','newest',newest,'Todavía no hay películas cargadas. Espera a que termine la carga del catálogo.','vod');
 h+=homeSection(ic('clapperboard')+' Series destacadas','series',series,'Todavía no hay series cargadas. Espera a que termine la carga del catálogo.','series');
 e.innerHTML=h;}
@@ -974,7 +999,7 @@ setTimeout(run,120)}
 function renderHome(){try{renderResume()}catch(x){}$('c_live').textContent=S.chs.length+' items';$('c_vod').textContent=CC.vod?CC.vod.length+' carpetas':'Explorar';$('c_ser').textContent=CC.series?CC.series.length+' carpetas':'Explorar';$('c_fav').textContent=S.fav.length+' items';$('c_pl').textContent=S.sess&&S.sess.m3u?'Lista M3U':'Cambiar lista';startHomeBackground();renderHomeRails()}
 function go(v){$('home').classList.toggle('hide',v!='home');$('br').classList.toggle('hide',v!='br')}
 [['hOut','back'],['hRef','refresh'],['hSet','gear'],['bBack','back'],['bFav','heart'],['bSea','search'],['bEdit','pencil'],['bSet','gear'],['stB','back'],['pvBk','back'],['pvRw','rw'],['pvFw','ff'],['pvI','info'],['pvA','music'],['pvS','cc'],['pvR','aspect'],['pvP','pip'],['pvF','full'],['pvO','gear']].forEach(function(p){$(p[0]).innerHTML=ic(p[1])});
-$('hRep').innerHTML=ic('replay')+' Replay';
+$('hRep').innerHTML=ic('replay');$('hRep').classList.remove('w');$('hRep').title='Historial';$('hRep').setAttribute('aria-label','Historial de canales vistos');
 setInterval(clock,5000);function clock(){var d=new Date();Array.prototype.forEach.call(document.querySelectorAll('.cl'),function(e){e.textContent=tstr(d)})}clock();
 /* ---------- Navegar (3 columnas) ---------- */
 async function openBr(mode,start,nopush){
@@ -2127,5 +2152,19 @@ body{background:radial-gradient(1100px 520px at 85% -12%,rgba(47,140,255,.22),tr
 })();
 </script>
 
+<script>
+/* Temporizador de apagado (web + reproductor nativo) */
+(function(){var SLP={m:0,end:0,t:null};
+function left(){return SLP.end?Math.max(0,Math.ceil((SLP.end-Date.now())/60000)):0}
+function ui(){[].forEach.call(document.querySelectorAll('#sleepChips .chip'),function(b){b.classList.toggle('on',(+b.getAttribute('data-m'))===SLP.m)});var i=$('sleepInfo');if(i)i.textContent=SLP.m?'Se detendrá en '+left()+' min.':'Detiene la reproducción al terminar el tiempo.'}
+function fire(){SLP.m=0;SLP.end=0;try{stopPv()}catch(e){}toast('Temporizador: reproducción detenida');ui()}
+function apply(m){clearTimeout(SLP.t);SLP.m=m;SLP.end=m?Date.now()+m*60000:0;
+try{if(NATIVE&&NATIVE.setSleepTimer){var r=NATIVE.setSleepTimer({minutes:m});if(r&&r.catch)r.catch(function(){})}}catch(e){}
+if(m)SLP.t=setTimeout(fire,m*60000);ui();toast(m?'Se detendrá en '+m+' min':'Temporizador desactivado')}
+var c=$('sleepChips');if(c)c.addEventListener('click',function(e){var b=e.target.closest('.chip');if(b)apply(+b.getAttribute('data-m'))});
+try{if(NATIVE&&NATIVE.addListener)NATIVE.addListener('sleep',function(){clearTimeout(SLP.t);SLP.m=0;SLP.end=0;ui()})}catch(e){}
+var po=$('po');if(po)new MutationObserver(ui).observe(po,{attributes:true});
+setInterval(function(){if(SLP.m&&SLP.end&&Date.now()>=SLP.end+2000){SLP.m=0;SLP.end=0}ui()},20000);ui()})();
+</script>
 </body>
 </html>
