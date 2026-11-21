@@ -1436,7 +1436,7 @@ if(curTab=='m'){var raw=$('plUrl').value.trim();if(!raw){msg('Pega la dirección
 var s=$('srv').value.trim(),u=$('usr').value.trim(),p=$('pwd').value;if(!s||!u||!p){msg('Escribe el servidor, usuario y contraseña.',1);return}s=norm(s);if(!s){msg('La dirección del servidor no es válida.',1);return}enter({s:s,u:u,p:p,name:n})};
 /* ---------- QR para entrar desde el móvil (igual que YERAL) ---------- */
 (function(){
-var BASE=(/^https?:/.test(location.protocol)&&location.hostname!='localhost'?location.origin+location.pathname:'https://glystv.github.io/Pro/'),peer=null;
+var BASE=(/^https?:/.test(location.protocol)&&location.hostname!='localhost'?location.origin+location.pathname:'https://glystv.github.io/yeral-Pro/'),peer=null;
 var PAIR=new URLSearchParams(location.search).get('pair');
 if(PAIR){/* ---- modo móvil: envía los datos a la TV ---- */
 function ld3(u,t,cb){if(t()){cb(1);return}var q=document.createElement('script');q.src=u;q.onload=function(){cb(t())};q.onerror=function(){cb(0)};document.head.appendChild(q)}
