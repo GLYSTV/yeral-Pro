@@ -645,26 +645,74 @@ body{background:radial-gradient(900px 520px at 14% -12%,rgba(112,40,245,.24),tra
 @keyframes yeralGlow{0%,100%{opacity:.7;transform:scale(.94)}50%{opacity:1;transform:scale(1.05)}}@keyframes yeralIntroIn{0%{opacity:0;transform:scale(.92);filter:blur(9px)}65%{opacity:1;filter:blur(0)}100%{opacity:1;transform:scale(1)}}@keyframes yeralLogoPulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.5)}}@keyframes yeralSubIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @media(max-width:849px){#br .brtop{gap:7px!important;padding:10px!important}#br .brtop .ib{width:42px!important;height:42px!important;min-width:42px!important;border-radius:13px!important}#cc,#ls{border-radius:15px!important}}
 </style>
+<style id="yeral-lists-login">
+/* ===== Entrada: listas guardadas + QR + diálogo Añadir lista (estilo Shamel) ===== */
+#login .lw,#login .lw.two{max-width:1000px;grid-template-columns:minmax(0,1.5fr) minmax(250px,1fr);grid-template-areas:"brand brand" "lists qr";align-items:start}
+#login .lw>.brand{grid-area:brand}#plBox{grid-area:lists}#login #qrbox{display:block!important;grid-area:qr}
+#login #qrc{width:210px;height:210px}
+.devline{font-size:12px}.devline b{font-family:ui-monospace,Menlo,monospace;color:#fff;font-weight:600}
+@media(max-width:760px){#login .lw,#login .lw.two{grid-template-columns:1fr;grid-template-areas:"brand" "lists" "qr"}#login #qrc{width:180px;height:180px}}
+.pairmode #plBox,.pairmode #qrbox{display:none!important}
+#plGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:16px 10px;margin-top:16px}
+.pl-tile{position:relative;text-align:center;padding:6px 4px;border-radius:16px;cursor:pointer}
+.pl-circ{width:84px;height:84px;margin:0 auto 8px;border-radius:50%;display:grid;place-items:center;background:#ffffff0f;border:1px solid #ffffff1f;color:var(--b2)}
+.pl-circ svg{width:36px;height:36px}.pl-plus{font-size:42px;font-weight:300;line-height:1;color:#fff;border-style:dashed}
+.pl-n{font-weight:700;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pl-t{font-size:11px;color:var(--m);margin-top:2px}
+.pl-ok{position:absolute;top:2px;left:calc(50% + 22px);width:24px;height:24px;border-radius:50%;background:#10b981;color:#fff;display:grid;place-items:center;font-size:13px;font-weight:800;box-shadow:0 0 0 3px #0b0914}
+.pl-x{position:absolute;top:2px;left:calc(50% - 52px);width:24px;height:24px;border-radius:50%;background:#000a;color:#ddd;display:grid;place-items:center;font-size:11px}
+.pl-tile:hover .pl-circ,.pl-tile:focus .pl-circ,.pl-tile.tv-focus .pl-circ{border-color:var(--b2);box-shadow:0 0 0 3px #ffffffcc}
+#addDlg{position:fixed;inset:0;z-index:20;display:none;align-items:center;justify-content:center;padding:12px;background:rgba(3,4,10,.88)}
+#addDlg.open{display:flex}
+.pairmode #addDlg{position:static;background:none;padding:0;display:flex}.pairmode #login{background:var(--s)}
+.dlg{width:min(100%,640px);max-height:96vh;overflow:auto;background:#161a2a;border:1px solid #ffffff14;border-radius:14px}
+.dlg h2{font-size:17px;padding:16px 18px;text-transform:uppercase;font-weight:600}
+.dtabs{display:grid;grid-template-columns:1fr 1fr}
+.dtabs button{padding:16px 6px;font-size:14px;letter-spacing:1.6px;text-transform:uppercase;color:var(--m);font-weight:600;border-bottom:3px solid transparent;background:transparent}
+.dtabs button.on{background:#222844;color:#fff;border-bottom-color:var(--b2)}
+.dbody{padding:12px 18px 18px}
+.dmac{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13px;color:#dfe3f3}
+.dmac b{font-family:ui-monospace,Menlo,monospace;font-weight:600}.dmac button{color:var(--b2);font-size:16px;padding:2px 6px}
+.dbody label{display:block;font-size:14px;color:#fff;margin:12px 0 6px}
+.dbody input{border-radius:6px;padding:13px;background:#151a2c;border:1px solid #ffffff40}
+#dlgErr{display:none;margin-top:12px;font-size:13px;border:1px solid #ffffff22;border-radius:10px;padding:8px 10px}
+.dbtns{display:grid;grid-template-columns:1.5fr 1fr;gap:10px;margin-top:16px}
+.dbtns .btn{margin-top:0;border-radius:8px;text-transform:uppercase;font-size:12.5px;padding:14px 6px}.dbtns .btn{color:#fff}.dbtns .btn:not(.g){background:linear-gradient(90deg,var(--b),var(--b2))}.dbtns .btn.g{background:#2b2b30}
+@media(max-width:420px){.dbtns{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
 <div id="intro" aria-hidden="true"><div class="ic"><div class="it">YERAL<span>-</span>Pro</div><div class="is">ENTRETENIMIENTO SIN LÍMITES</div><div class="ib2"><i></i></div></div></div>
 <div id="login"><div class="lw">
 <div class="brand"><div class="bi" role="img" aria-label="YERAL-Pro"></div><div><div class="bt">YERAL<span class="logo">-</span><em>Pro</em></div><div class="bs">IPTV Player</div></div></div>
-<div class="lc">
-<h1>Iniciar sesión</h1><p>Escribe el servidor, tu usuario y contraseña.</p>
-<label>Servidor</label><input id="srv" placeholder="http://servidor:puerto" autocapitalize="off" autocomplete="off" inputmode="url">
-<label>Usuario</label><input id="usr" placeholder="usuario" autocapitalize="off" autocomplete="off">
-<label>Contraseña</label><div class="pw"><input id="pwd" type="password" placeholder="••••••••" autocomplete="off"><button type="button" id="eye" aria-label="Mostrar contraseña"></button></div>
-<button class="btn" id="lgIn">Entrar</button>
-<button class="alt" id="lgM3">Usar una lista M3U</button>
+<div class="lc" id="plBox">
+<h1>Listas de reproducción</h1><p>Toca una lista para entrar o añade una nueva (Xtream o M3U).</p>
+<div id="plGrid"></div>
 <div id="lerr"></div>
 </div>
 <div class="lc" id="qrbox">
-<h3>📱 Entrar desde el móvil</h3>
-<p>Escanea este código con tu teléfono y escribe ahí el servidor, usuario y contraseña.</p>
+<h3>📱 Añadir lista desde el móvil</h3>
+<p>Escanea este código con tu teléfono y escribe ahí tus datos. La lista se añade aquí sola.</p>
 <canvas id="qrc"></canvas><p id="qrtxt"></p>
+<p class="devline">ID del dispositivo: <b id="devId2"></b></p>
 </div>
-</div></div>
+</div>
+<div id="addDlg" role="dialog" aria-modal="true" aria-label="Añadir lista de reproducción"><div class="dlg">
+<h2>+ Añadir lista de reproducción</h2>
+<div class="dtabs"><button type="button" id="tabX" class="on">Códigos Xtream</button><button type="button" id="tabM">Añadir M3U</button></div>
+<div class="dbody">
+<div class="dmac"><span>ID del dispositivo</span><span><b id="devId"></b> <button type="button" id="devCopy" aria-label="Copiar ID">⧉</button></span></div>
+<label for="plName">Nombre de la lista</label><input id="plName" placeholder="Mi lista" autocapitalize="off" autocomplete="off">
+<div id="paneX">
+<label for="srv">Servidor (URL y puerto)</label><input id="srv" placeholder="http://servidor:8080" autocapitalize="off" autocomplete="off" inputmode="url">
+<label for="usr">Nombre de usuario</label><input id="usr" placeholder="Usuario" autocapitalize="off" autocomplete="off">
+<label for="pwd">Contraseña</label><div class="pw"><input id="pwd" type="password" placeholder="Contraseña" autocomplete="off"><button type="button" id="eye" aria-label="Mostrar contraseña"></button></div>
+</div>
+<div id="paneM" class="hide">
+<label for="plUrl">URL de la lista M3U</label><input id="plUrl" placeholder="http://servidor/lista.m3u" autocapitalize="off" autocomplete="off" inputmode="url">
+</div>
+<div id="dlgErr"></div>
+<div class="dbtns"><button type="button" class="btn" id="lgIn">+ Añadir lista de reproducción</button><button type="button" class="btn g" id="lgCancel">Cancelar</button></div>
+</div></div></div></div>
 <div id="pick"><div class="logo" style="font-size:30px;font-weight:800">YERAL-Pro</div><p style="color:var(--m);margin-top:6px">¿Quién está viendo?</p><div class="pf" id="pfs"></div></div>
 <div id="app">
 <div id="home">
@@ -697,7 +745,7 @@ body{background:radial-gradient(900px 520px at 14% -12%,rgba(112,40,245,.24),tra
   <div id="yuCheckStatus" class="yu-check-status" aria-live="polite">Comprueba si hay una nueva versión disponible.</div>
 </div><div id="sgen" class="hide">
 <div class="opt"><div><b>Reproductor nativo</b><div class="sub">Usa el reproductor del sistema, sin los controles nuevos (reinicia la app).</div></div><input id="natO" type="checkbox"></div>
-<div class="row2"><button class="btn" id="gRel">Recargar canales</button><button class="btn g" id="gOut">Cerrar sesión</button></div></div>
+<div class="row2"><button class="btn" id="gRel">Recargar canales</button><button class="btn g" id="gOut">Cambiar de lista</button></div></div>
 <div class="row2"><button class="btn g" id="stX">Cerrar</button></div></div></div>
 <div id="par" class="mod hide"><div class="mp" style="max-width:460px"><h3>Control parental</h3><p id="parS" class="sub" style="white-space:normal;margin:8px 0"></p><input id="parP" type="password" inputmode="numeric" maxlength="8" placeholder="PIN"><div class="row2"><button class="btn" id="parOk"></button><button class="btn g" id="parC">Cambiar PIN</button><button class="btn g" id="parX">Cerrar</button></div></div></div>
 <div id="hm" class="mod hide"><div class="mp" style="max-width:520px"><h3 id="hmT"></h3><div id="hmL"></div><div class="row2"><button class="btn" id="hmOk">Guardar</button><button class="btn g" id="hmX">Cancelar</button></div></div></div>
@@ -727,7 +775,7 @@ var X=Object.assign({lang:'es',tf:24,auto:0,ext:'',spf:1,num:1},ld('pro_x',{}));
 var I={globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>',clock:'<circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M10 2h4"/>',ext:'<path d="M14 4h6v6M20 4l-9 9M18 14v5H5V6h5"/>',back:'<path d="M19 12H5M11 6l-6 6 6 6"/>',heart:'<path d="M12 20s-8-5-8-11a4.5 4.5 0 0 1 8-2.5A4.5 4.5 0 0 1 20 9c0 6-8 11-8 11z"/>',search:'<circle cx="11" cy="11" r="6"/><path d="M16 16l5 5"/>',pencil:'<path d="M4 20l1-4L16 5l3 3L8 19zM14 7l3 3"/>',replay:'<path d="M4 12a8 8 0 1 0 3-6M4 4v5h5M12 8v4l3 2"/>',refresh:'<path d="M20 11a8 8 0 0 0-14-4M4 4v4h4M4 13a8 8 0 0 0 14 4M20 20v-4h-4"/>',gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>',lock:'<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',play:'<circle cx="12" cy="12" r="9"/><path d="M10 8l6 4-6 4z"/>',cc:'<rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10 10a2 2 0 1 0 0 4M16 10a2 2 0 1 0 0 4"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',eyeoff:'<path d="M3 3l18 18M6.5 7.5A15 15 0 0 0 3 12s4 6 9 6c1.4 0 2.7-.4 3.8-1M10 6.2A9 9 0 0 1 12 6c5 0 9 6 9 6a15 15 0 0 1-3 3.5"/>',eye:'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',trash:'<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/>',down:'<circle cx="12" cy="12" r="9"/><path d="M12 7v8M8 12l4 4 4-4"/>',info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/>',music:'<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>',aspect:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M8 10V8h2M16 14v2h-2"/>',pip:'<rect x="3" y="5" width="18" height="14" rx="2"/><rect x="12" y="11" width="7" height="5"/>',full:'<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',rw:'<path d="M11 6L3 12l8 6zM21 6l-8 6 8 6z"/>',ff:'<path d="M13 6l8 6-8 6zM3 6l8 6-8 6z"/>',tv:'<rect x="3" y="5" width="18" height="13" rx="2"/><path d="M8 21h8M12 18v3"/>',movie:'<rect x="3" y="8" width="18" height="12" rx="2"/><path d="M3 8l3-4h4L7 8M10 8l3-4h4l-3 4"/>',film:'<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 3v18M16 3v18M4 8h4M4 12h4M4 16h4M16 8h4M16 12h4M16 16h4"/>',list:'<rect x="8" y="3" width="12" height="14" rx="2"/><path d="M4 7v13h12"/>'};
 function ic(k){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+I[k]+'</svg>'}
 function norm(u){u=String(u||'').trim().replace(/\/+$/,'');if(!u)return '';if(/^[a-z][a-z0-9+.-]*:/i.test(u)&&!/^https?:\/\//i.test(u)&&! /^[^/:]+:\d+(?:\/|$)/.test(u))return '';if(!/^https?:\/\//i.test(u))u='http://'+u;try{var x=new URL(u);if((x.protocol!=='http:'&&x.protocol!=='https:')||!x.hostname)return '';return x.origin+x.pathname.replace(/\/+$/,'')+x.search+x.hash}catch(e){return ''}}
-function msg(t,bad){var e=$('lerr');e.textContent=t||'';e.style.display=t?'block':'none';e.style.color=bad?'#fca5a5':'#a7f3d0'}
+function msg(t,bad){['lerr','dlgErr'].forEach(function(k){var e=$(k);if(!e)return;e.textContent=t||'';e.style.display=t?'block':'none';e.style.color=bad?'#fca5a5':'#a7f3d0'})}
 function show(id,on){$(id).style.display=on?(id=='app'?'flex':'block'):'none'}
 function toast(t){try{hostOv()}catch(e){}var x=$('tt');x.textContent=t;x.classList.remove('hide');clearTimeout(toast.t);toast.t=setTimeout(function(){x.classList.add('hide')},2300)}
 function p2(n){return('0'+n).slice(-2)}
@@ -804,7 +852,7 @@ msg('Cargando canales…');
 try{
 var l=ss.m3u?parseM3U(await fetchTextTimeout(ss.m3u)):await loadXtream(ss);
 if(!l.length)throw new Error('La lista no tiene canales.');
-S.chs=prep(l);if(!ld(featuredKey(),null))HCH=getFeatured();S.sess=ss;CC={};SC={};HOME_BG.token++;HOME_BG.running=false;HOME_BG.done=false;sv('pro_sess',ss);msg('');show('login',0);pickProfile(0)
+S.chs=prep(l);if(!ld(featuredKey(),null))HCH=getFeatured();S.sess=ss;CC={};SC={};HOME_BG.token++;HOME_BG.running=false;HOME_BG.done=false;sv('pro_sess',ss);try{rememberList(ss)}catch(e){}msg('');show('login',0);pickProfile(0)
 }catch(e){msg(e.message&&e.message.length<90?e.message:'No se pudo conectar. Revisa los datos y la conexión.',1)}
 }
 var AMC={},AIN={};
@@ -1292,7 +1340,7 @@ try{var ss=S.sess,l=ss.m3u?parseM3U(await fetchTextTimeout(ss.m3u,30000)):await 
 if(!$('br').classList.contains('hide'))openBr(S.mode,null,1);else renderHome()}catch(e){toast((e&&e.message)?'Actualización: '+e.message:'No se pudo actualizar')}finally{reloadBusy=false}}
 $('gRel').onclick=function(){$('st').classList.add('hide');reload()};
 
-$('gOut').onclick=function(){$('st').classList.add('hide');stopPv();try{localStorage.removeItem('pro_sess')}catch(x){}S.sess=null;S.chs=[];show('app',0);show('pick',0);show('login',1)};
+$('gOut').onclick=function(){$('st').classList.add('hide');stopPv();try{localStorage.removeItem('pro_sess')}catch(x){}S.sess=null;S.chs=[];show('app',0);show('pick',0);show('login',1);try{renderLists()}catch(x){}};
 $('hOut').style.display='none';$('hRef').onclick=reload;
 /* control parental */
 function parUI(){var has=!!ld('pro_pin','');$('parS').textContent=!has?'Crea un PIN para proteger el contenido adulto.':(unlocked?'Contenido adulto: DESBLOQUEADO':'Contenido adulto: BLOQUEADO');$('parOk').textContent=!has?'Guardar PIN':(unlocked?'Bloquear':'Desbloquear');$('parC').style.display=has?'':'none';$('parP').value=''}
@@ -1337,16 +1385,38 @@ document.addEventListener('keydown',function(e){if((e.key=='Enter'||e.key==' ')&
 var eye=$('eye');eye.innerHTML=ic('eye');
 eye.onclick=function(){var s=$('pwd').type=='password';$('pwd').type=s?'text':'password';eye.innerHTML=ic(s?'eyeoff':'eye');eye.setAttribute('aria-label',s?'Ocultar contraseña':'Mostrar contraseña')};
 ['srv','usr','pwd'].forEach(function(i){$(i).addEventListener('keydown',function(e){if(e.key=='Enter')$('lgIn').click()})});
-$('lgIn').onclick=function(){var s=$('srv').value.trim(),u=$('usr').value.trim(),p=$('pwd').value;if(!s||!u||!p){msg('Escribe el servidor, usuario y contraseña.',1);return}s=norm(s);if(!s){msg('La dirección del servidor no es válida.',1);return}enter({s:s,u:u,p:p})};
-$('lgM3').onclick=function(){var u=prompt('Pega la URL de tu lista M3U');if(!u)return;u=norm(u);if(!u){msg('La dirección de la lista no es válida.',1);return}enter({m3u:u})};
+/* ---------- Listas guardadas y diálogo «Añadir lista» ---------- */
+var curTab='x';
+function lists(){var a=ld('pro_lists',[]);return Array.isArray(a)?a:[]}
+function listKey(x){return x.m3u?'m:'+x.m3u:'x:'+(x.s||'')+'|'+(x.u||'')}
+function defName(x){if(x.name)return x.name;try{return x.m3u?'M3U '+new URL(x.m3u).hostname:new URL(x.s).hostname}catch(e){return x.m3u?'Lista M3U':'Xtream'}}
+function rememberList(ss){var a=lists(),k=listKey(ss),f=null;a.forEach(function(x){if(listKey(x)==k)f=x});if(!f){f={id:Date.now().toString(36)+Math.random().toString(36).slice(2,5)};a.push(f)}var old=f.name;Object.assign(f,ss);f.name=ss.name||old||defName(ss);ss.name=f.name;ss.id=f.id;sv('pro_lists',a);sv('pro_active',f.id);closeDlg();renderLists()}
+function renderLists(){var a=lists(),act=ld('pro_active',''),h=a.map(function(x){return '<div class="pl-tile" role="button" tabindex="0" data-id="'+esc(x.id)+'"><span class="pl-circ">'+(x.m3u?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>':ic('globe'))+'</span>'+(x.id==act?'<span class="pl-ok">✓</span>':'')+'<span class="pl-x" role="button" tabindex="0" data-del="'+esc(x.id)+'" aria-label="Eliminar lista">✕</span><div class="pl-n">'+esc(x.name||defName(x))+'</div><div class="pl-t">'+(x.m3u?'M3U':'Xtream')+'</div></div>'}).join('');
+h+='<div class="pl-tile" role="button" tabindex="0" id="plAdd"><span class="pl-circ pl-plus">+</span><div class="pl-n">Añadir lista</div><div class="pl-t">Xtream o M3U</div></div>';$('plGrid').innerHTML=h}
+function delList(id){if(!confirm('¿Eliminar esta lista de la app?'))return;sv('pro_lists',lists().filter(function(x){return x.id!=id}));if(ld('pro_active','')==id)try{localStorage.removeItem('pro_active')}catch(e){}renderLists()}
+$('plGrid').onclick=function(e){var d=e.target.closest('[data-del]');if(d){e.stopPropagation();delList(d.getAttribute('data-del'));return}if(e.target.closest('#plAdd')){openDlg();return}var t=e.target.closest('[data-id]');if(t){var x=lists().filter(function(y){return y.id==t.getAttribute('data-id')})[0];if(x){msg('Cargando lista…');enter(x)}}};
+function devId(){var v=ld('pro_devid','');if(!/^[0-9A-F]{2}(:[0-9A-F]{2}){5}$/.test(v)){var b=new Uint8Array(6);try{crypto.getRandomValues(b)}catch(e){for(var i=0;i<6;i++)b[i]=Math.floor(Math.random()*256)}b[0]=(b[0]|2)&254;v=Array.prototype.map.call(b,function(n){return('0'+n.toString(16)).slice(-2)}).join(':').toUpperCase();sv('pro_devid',v)}return v}
+$('devId').textContent=$('devId2').textContent=devId();
+$('devCopy').onclick=function(){var v=devId();try{navigator.clipboard.writeText(v).then(function(){toast('ID copiado')},function(){toast(v)})}catch(e){toast(v)}};
+function setTab(t){curTab=t;$('tabX').classList.toggle('on',t=='x');$('tabM').classList.toggle('on',t=='m');$('paneX').classList.toggle('hide',t!='x');$('paneM').classList.toggle('hide',t!='m');msg('')}
+function openDlg(t){['plName','srv','usr','pwd','plUrl'].forEach(function(k){$(k).value=''});setTab(t||'x');$('addDlg').classList.add('open');setTimeout(function(){try{$('plName').focus()}catch(e){}},60)}
+function closeDlg(){$('addDlg').classList.remove('open')}
+$('tabX').onclick=function(){setTab('x')};$('tabM').onclick=function(){setTab('m')};
+$('lgCancel').onclick=closeDlg;
+document.addEventListener('keydown',function(e){if(e.key=='Escape'&&$('addDlg').classList.contains('open')){e.preventDefault();closeDlg()}});
+renderLists();
+/* ---------- Login ---------- */
+$('lgIn').onclick=function(){var n=$('plName').value.trim();
+if(curTab=='m'){var raw=$('plUrl').value.trim();if(!raw){msg('Pega la dirección de tu lista M3U.',1);return}var m=norm(raw);if(!m){msg('La dirección de la lista no es válida.',1);return}enter({m3u:m,name:n});return}
+var s=$('srv').value.trim(),u=$('usr').value.trim(),p=$('pwd').value;if(!s||!u||!p){msg('Escribe el servidor, usuario y contraseña.',1);return}s=norm(s);if(!s){msg('La dirección del servidor no es válida.',1);return}enter({s:s,u:u,p:p,name:n})};
 /* ---------- QR para entrar desde el móvil (igual que YERAL) ---------- */
 (function(){
 var BASE=(/^https?:/.test(location.protocol)&&location.hostname!='localhost'?location.origin+location.pathname:'https://glystv.github.io/Pro/'),peer=null;
 var PAIR=new URLSearchParams(location.search).get('pair');
 if(PAIR){/* ---- modo móvil: envía los datos a la TV ---- */
 function ld3(u,t,cb){if(t()){cb(1);return}var q=document.createElement('script');q.src=u;q.onload=function(){cb(t())};q.onerror=function(){cb(0)};document.head.appendChild(q)}
-$('lgIn').textContent='Enviar a la TV';$('lgM3').style.display='none';msg('Escribe tus datos y se enviarán a la TV.');
-$('lgIn').onclick=function(ev){ev.stopImmediatePropagation();var d={s:norm($('srv').value.trim()),u:$('usr').value.trim(),p:$('pwd').value};if(!d.s||!d.u||!d.p){msg('Escribe el servidor, usuario y contraseña.',1);return}
+document.documentElement.classList.add('pairmode');$('lgIn').textContent='Enviar a la TV';$('lgCancel').style.display='none';openDlg();msg('Escribe tus datos y se enviarán a la TV.');
+$('lgIn').onclick=function(ev){ev.stopImmediatePropagation();var d=curTab=='m'?{m3u:norm($('plUrl').value.trim()),n:$('plName').value.trim()}:{s:norm($('srv').value.trim()),u:$('usr').value.trim(),p:$('pwd').value,n:$('plName').value.trim()};if(curTab=='m'?!d.m3u:(!d.s||!d.u||!d.p)){msg(curTab=='m'?'Escribe una dirección M3U válida.':'Escribe el servidor, usuario y contraseña.',1);return}
 msg('Conectando con la TV…');
 ld3('https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js',function(){return !!(window.Peer||(window.peerjs&&window.peerjs.Peer))},function(ok){
 if(!ok){msg('No se pudo cargar el servicio de emparejamiento.',1);return}
@@ -1358,17 +1428,16 @@ cn.on('open',function(){cn.send(JSON.stringify(d))});
 cn.on('data',function(x){if(x&&x.t=='ack'){done=1;clearTimeout(to);msg('✅ Listo. Ya puedes mirar la TV.')}});
 cn.on('error',function(){if(!done)msg('No se pudo conectar con la TV.',1)})})})};
 return}
-function ld2(u,t,cb){if(t()){cb(1);return}var s=document.createElement('script');s.src=u;s.onload=function(){cb(t())};s.onerror=function(){cb(0)};document.head.appendChild(s)}
+function ld2(u,t,cb){if(t()){cb(1);return}var loc=/qrcode/.test(u)?'qrcode.js':'peerjs.min.js',urls=[loc,u];(function nx(){var x=urls.shift();if(!x){cb(0);return}var s=document.createElement('script');s.src=x;s.onload=function(){t()?cb(1):nx()};s.onerror=function(){nx()};document.head.appendChild(s)})()}
 function txt(t){$('qrtxt').textContent=t}
 function draw2(text){var cv=$('qrc'),q=qrcode(0,'M');q.addData(text);q.make();var n=q.getModuleCount(),pad=4,px=6,sz=(n+pad*2)*px;cv.width=cv.height=sz;var g=cv.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,sz,sz);g.fillStyle='#000';for(var r=0;r<n;r++)for(var c=0;c<n;c++)if(q.isDark(r,c))g.fillRect((c+pad)*px,(r+pad)*px,px,px)}
-if(!(NATIVE||window.innerWidth>=900))return;
-$('qrbox').style.display='block';document.querySelector('.lw').classList.add('two');txt('Preparando código QR…');
+txt('Preparando código QR…');
 ld2('https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js',function(){return typeof window.qrcode=='function'},function(a){
 ld2('https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js',function(){return !!(window.Peer||(window.peerjs&&window.peerjs.Peer))},function(b){
 if(!a||!b){txt('No se pudo cargar el QR. Usa el formulario.');return}
 var P=window.Peer||window.peerjs.Peer,id='yeral-'+Math.random().toString(36).slice(2,12).toUpperCase();
 peer=new P(id);peer.on('open',function(pid){draw2(BASE+'?pair='+encodeURIComponent(pid));txt('Escanea el código QR con tu teléfono')});
-peer.on('connection',function(cn){cn.on('data',function(d){try{if(typeof d=='string')d=JSON.parse(d);if(!d||!d.s||!d.u||!d.p)return;$('srv').value=d.s;$('usr').value=d.u;$('pwd').value=d.p;try{cn.send({t:'ack'})}catch(x){}txt('Datos recibidos. Iniciando sesión…');$('lgIn').click()}catch(x){}})});
+peer.on('connection',function(cn){cn.on('data',function(d){try{if(typeof d=='string')d=JSON.parse(d);if(!d)return;if(d.m3u){setTab('m');$('plUrl').value=d.m3u}else if(d.s&&d.u&&d.p){setTab('x');$('srv').value=d.s;$('usr').value=d.u;$('pwd').value=d.p}else return;$('plName').value=d.n||'';try{cn.send({t:'ack'})}catch(x){}txt('Datos recibidos. Iniciando sesión…');$('lgIn').click()}catch(x){}})});
 peer.on('error',function(){txt('Sin conexión con el servicio del QR.')})
 })})
 })();
