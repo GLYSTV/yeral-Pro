@@ -1,12 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-<defs>
-  <radialGradient id="bg" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#2a1670"/><stop offset=".55" stop-color="#120b34"/><stop offset="1" stop-color="#07051a"/></radialGradient>
-  <linearGradient id="gy" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9b6bff"/><stop offset=".5" stop-color="#6d45ff"/><stop offset="1" stop-color="#22d3ee"/></linearGradient>
-  <linearGradient id="gs" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset=".45" stop-color="#fff" stop-opacity="0"/></linearGradient>
-  <linearGradient id="gp" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe08a"/><stop offset="1" stop-color="#ffb02e"/></linearGradient>
-  <radialGradient id="glow" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#22d3ee" stop-opacity=".35"/><stop offset="1" stop-color="#22d3ee" stop-opacity="0"/></radialGradient>
-</defs><rect width="512" height="512" fill="url(#bg)"/><circle cx="256" cy="262" r="210" fill="url(#glow)"/>
-  <circle cx="256" cy="256" r="196" fill="none" stroke="#8b6cff" stroke-opacity=".35" stroke-width="3"/><g transform="translate(256 262) scale(.92) translate(-256 -259)">
-  <path d="M96 104H196L256 212L316 104H416L308 300V414H204V300Z" fill="url(#gy)"/>
-  <path d="M96 104H196L256 212L316 104H416L308 300V414H204V300Z" fill="url(#gs)"/>
-  <path d="M236 108V176L296 142Z" fill="url(#gp)"/></g></svg>
+<defs><radialGradient id="bg" cx="50%" cy="30%" r="80%"><stop offset="0" stop-color="#0c2a66"/><stop offset=".55" stop-color="#04102e"/><stop offset="1" stop-color="#020712"/></radialGradient>
+<linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe25c"/><stop offset=".55" stop-color="#ffc414"/><stop offset="1" stop-color="#d68000"/></linearGradient></defs>
+<rect width="512" height="512" rx="100" fill="url(#bg)"/>
+<rect x="10" y="10" width="492" height="492" rx="92" fill="none" stroke="#ffc928" stroke-width="9"/>
+<path fill="url(#g)" fill-rule="evenodd" d="M112 98V414L440 256ZM172 200V312L276 256Z"/>
+<path fill="url(#g)" d="M80 372C190 330 330 322 436 340C340 346 200 366 80 372Z"/>
+</svg>

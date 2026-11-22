@@ -478,10 +478,10 @@ public class NativePlayerPlugin extends Plugin {
     android.graphics.drawable.GradientDrawable g = new android.graphics.drawable.GradientDrawable();
     g.setCornerRadius(26);
     if (focus) {
-      g.setColor(Color.rgb(123, 77, 255));
+      g.setColor(Color.rgb(255,201,40));
       g.setStroke(4, Color.WHITE);
     } else if (hl) {
-      g.setColor(Color.rgb(42, 31, 102));
+      g.setColor(Color.rgb(31,57,102));
       g.setStroke(2, Color.rgb(34, 211, 238));
     } else {
       g.setColor(Color.argb(215, 20, 17, 47));
@@ -723,7 +723,7 @@ public class PlayerActivity extends Activity {
   private String firstInfo = "";
   private final Runnable clear = () -> status.setText("");
 
-  private static final int ACCENT = Color.rgb(123, 77, 255);
+  private static final int ACCENT = Color.rgb(255,201,40);
   private long t0 = 0;
   private String retryInfo = "";
   private int nRetries = 0;
@@ -1469,7 +1469,7 @@ public class PlayerActivity extends Activity {
       float dn = getResources().getDisplayMetrics().density;
       android.widget.LinearLayout col = new android.widget.LinearLayout(c);
       col.setOrientation(android.widget.LinearLayout.VERTICAL);
-      col.setBackgroundColor(Color.rgb(12, 10, 30));
+      col.setBackgroundColor(Color.rgb(10,17,30));
       TextView h = new TextView(c);
       h.setText(title.toUpperCase());
       h.setTextColor(ACCENT);
@@ -1477,7 +1477,7 @@ public class PlayerActivity extends Activity {
       h.setPadding((int) (20 * dn), (int) (18 * dn), (int) (20 * dn), (int) (12 * dn));
       col.addView(h);
       View line = new View(c);
-      line.setBackgroundColor(Color.rgb(123, 77, 255));
+      line.setBackgroundColor(Color.rgb(255,201,40));
       col.addView(line, new android.widget.LinearLayout.LayoutParams(-1, (int) (2 * dn)));
       android.widget.LinearLayout box = new android.widget.LinearLayout(c);
       box.setOrientation(android.widget.LinearLayout.VERTICAL);
@@ -1495,7 +1495,7 @@ public class PlayerActivity extends Activity {
         t.setFocusable(true);
         t.setClickable(true);
         t.setOnFocusChangeListener((view, f) ->
-            t.setBackgroundColor(f ? Color.rgb(123, 77, 255) : Color.TRANSPARENT));
+            t.setBackgroundColor(f ? Color.rgb(255,201,40) : Color.TRANSPARENT));
         t.setOnClickListener(view -> { dlg.dismiss(); if (l != null) l.onClick(dlg, w); });
         box.addView(t);
         if (first == null) first = t;
@@ -2109,7 +2109,7 @@ import java.util.ArrayList;
  * y la app sigue funcionando con normalidad.
  */
 public class AltPlayerActivity extends Activity implements SurfaceHolder.Callback {
-  private static final int ACCENT = Color.rgb(123, 77, 255);
+  private static final int ACCENT = Color.rgb(255,201,40);
   private static final String UA = "VLC/3.0.18 LibVLC/3.0.18";
   private static final long TIMEOUT_MS = 22000;
   private static final Object MPV_LOCK = new Object();
@@ -3049,7 +3049,7 @@ print('iconos ok')
 ICONS
 fi
 BGXML=android/app/src/main/res/values/ic_launcher_background.xml
-[ -f "$BGXML" ] && sed -i -E 's#(<color name="ic_launcher_background">)[^<]*(</color>)#\1\#07051A\2#' "$BGXML" || true
+[ -f "$BGXML" ] && sed -i -E 's#(<color name="ic_launcher_background">)[^<]*(</color>)#\1\#020712\2#' "$BGXML" || true
 
 # Pantalla de arranque (splash), barra de estado y colores del tema Android con la misma paleta Aurora del intro
 python3 - <<'SPLASHPY' || echo "AVISO: no se pudo personalizar el splash"
@@ -3069,7 +3069,7 @@ for f in glob.glob('android/app/src/main/res/drawable*/splash.png'):
 print('splash ok')
 SPLASHPY
 COLXML=android/app/src/main/res/values/colors.xml
-[ -f "$COLXML" ] && sed -i -E 's#(<color name="colorPrimary">)[^<]*(</color>)#\1\#07051A\2#; s#(<color name="colorPrimaryDark">)[^<]*(</color>)#\1\#07051A\2#; s#(<color name="colorAccent">)[^<]*(</color>)#\1\#7B4DFF\2#' "$COLXML" || true
+[ -f "$COLXML" ] && sed -i -E 's#(<color name="colorPrimary">)[^<]*(</color>)#\1\#020712\2#; s#(<color name="colorPrimaryDark">)[^<]*(</color>)#\1\#020712\2#; s#(<color name="colorAccent">)[^<]*(</color>)#\1\#FFC928\2#' "$COLXML" || true
 
 sed -i 's#<application#<application android:usesCleartextTraffic="true"#' $MAN
 sed -i 's#</application>#    <activity android:name=".PlayerActivity" android:exported="false" android:configChanges="orientation|screenSize|keyboardHidden|screenLayout|smallestScreenSize" android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" />\n    </application>#' $MAN

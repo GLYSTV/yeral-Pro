@@ -78,3 +78,13 @@ YERAL-Pro AURORA (21-11-2026) — nuevo estilo unificado:
 - La página que se abre al escanear el QR (remote.html) ahora es YERAL-Pro con la misma paleta; antes la compilación copiaba una plantilla roja de GLYSTV.
 - Pequeñas correcciones: «Todos los canales» y «Visto recientemente» ya no se parten en 3 líneas; cabecera del inicio ajustada para celular vertical.
 - No cambió la lógica de la app (login, listas, QR, perfiles, favoritos, reproductores).
+
+
+YERAL-Pro REFERENCIA (22-11-2026) — diseño igual a la imagen de referencia:
+- Paleta: azul noche (#020712), azul eléctrico para marcos y dorado (#ffc928) para selección, botones y acentos. Los tonos violeta de Aurora pasaron a azul en toda la hoja de estilos, remote.html, icono.svg y el reproductor nativo (acento dorado).
+- Logo nuevo «Yeral-PRO» (play dorado + trazo dorado) en: intro, cabecera, selector de perfil, icono de la APK (icono.png / icono.svg), banner de Android TV (banner.png), logo.png, favicon y pantalla de login.
+- Inicio: cabecera con lema, buscar, campana, ajustes y fecha/hora; menú lateral (Inicio, TV en Vivo, Películas, Series, Música, Radio, Mi Lista, Continuar viendo) con «Inicio» en dorado y recuadro «Disfruta la Mejor Experiencia»; banner «Fe que inspira… Ver Ahora»; filas TV en Vivo (con logotipos de tu lista), Películas y Series con «Ver Todos ›»; barra inferior Ultra HD / 4K · Radio Cristiana · Mi Lista · Comparte la Fe.
+- Control remoto: el elemento enfocado se marca con aro dorado y escala; la fila de canales y los carruseles se mueven en horizontal.
+- Música y Radio abren el buscador global con esa palabra; Continuar viendo abre el historial. El botón «Listas» del menú se ocultó (sigue en Configuración > Cambiar de lista).
+- Compatibilidad: celular, Google TV, Android TV, TV box y Fire TV (leanback y pantalla táctil opcionales en el manifest). La calidad HD/Full HD/4K/8K depende de la fuente.
+- No cambió la lógica de login, listas, QR, perfiles y reproductores. No se pudo compilar el APK aquí: compilar con GitHub Actions (build.yml).
