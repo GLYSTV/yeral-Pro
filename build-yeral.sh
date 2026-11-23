@@ -860,10 +860,12 @@ public class PlayerActivity extends Activity {
             .setExtensionRendererMode(
                 DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER);
 
-    /* Arranque más rápido: empieza con 0,5 s de vídeo en buffer (antes 2,5 s) */
+    /* Búfer según el perfil elegido en Opciones (Rápido / Normal / Estable).
+       Normal = configuración original: 15/50 s, empieza con 1 s, tras corte 2,5 s. */
+    int[] bd = bufferDurations(bufferProfile());
     androidx.media3.exoplayer.DefaultLoadControl lc =
         new androidx.media3.exoplayer.DefaultLoadControl.Builder()
-            .setBufferDurationsMs(15000, 50000, 1000, 2500)
+            .setBufferDurationsMs(bd[0], bd[1], bd[2], bd[3])
             .build();
 
     player = new ExoPlayer.Builder(this, rf)
@@ -1524,6 +1526,7 @@ public class PlayerActivity extends Activity {
     it.add("Velocidad");
     it.add("Temporizador para dormir");
     it.add("Salto: " + (skipMs / 1000) + " s");
+    it.add("Buffer: " + BUF_NAMES[bufferProfile()]);
     it.add("Reproducir con VLC");
     it.add("Reproducir con MPV");
     new SideMenu(this)
@@ -1535,8 +1538,9 @@ public class PlayerActivity extends Activity {
           else if (w == 3) pickSpeed();
           else if (w == 4) pickSleep();
           else if (w == 5) pickSkip();
-          else if (w == 6) launchAlt("vlc");
-          else if (w == 7) launchAlt("mpv");
+          else if (w == 6) pickBuffer();
+          else if (w == 7) launchAlt("vlc");
+          else if (w == 8) launchAlt("mpv");
         }).show();
   }
 
@@ -1645,6 +1649,37 @@ public class PlayerActivity extends Activity {
             uiH.postDelayed(sleepR, mins[w] * 60000L);
             say("Se detendrá en " + mins[w] + " min");
           }
+        }).show();
+  }
+
+  /* ---- Buffer: 0 = Rápido, 1 = Normal (por defecto, igual que antes), 2 = Estable ---- */
+  private static final String[] BUF_NAMES = {"Rápido", "Normal", "Estable"};
+
+  private int bufferProfile() {
+    int v = getSharedPreferences("yeral_prefs", MODE_PRIVATE).getInt("buffer", 1);
+    return (v < 0 || v > 2) ? 1 : v;
+  }
+
+  private static int[] bufferDurations(int profile) {
+    switch (profile) {
+      case 0:  return new int[]{10000, 25000, 500, 1500};    /* Rápido: menos retraso en TV en vivo */
+      case 2:  return new int[]{30000, 120000, 2500, 5000};  /* Estable: internet lenta o 4K/8K */
+      default: return new int[]{15000, 50000, 1000, 2500};   /* Normal: igual que antes */
+    }
+  }
+
+  /* Se guarda y se aplica en la siguiente reproducción (el búfer se define al crear el reproductor) */
+  private void pickBuffer() {
+    final int cur = bufferProfile();
+    final String[] labels = {
+        "Rápido · 10/25 s · menos retraso en TV en vivo",
+        "Normal · 15/50 s · uso general",
+        "Estable · 30/120 s · internet lenta o 4K/8K"};
+    for (int i = 0; i < labels.length; i++) if (i == cur) labels[i] = "✓ " + labels[i];
+    new SideMenu(this).setTitle("Buffer")
+        .setItems(labels, (d, w) -> {
+          getSharedPreferences("yeral_prefs", MODE_PRIVATE).edit().putInt("buffer", w).apply();
+          say("Buffer: " + BUF_NAMES[w] + ". Se aplica en la próxima reproducción");
         }).show();
   }
 
