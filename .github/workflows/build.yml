@@ -2,9 +2,6 @@ name: YERAL-PRO - Compilar APK
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
 
 permissions:
   contents: write
@@ -89,6 +86,15 @@ jobs:
           fi
           echo "OK: la APK usa la firma fija."
 
+      - name: Verificar que la APK no es depurable
+        run: |
+          AAPT2=$(ls "$ANDROID_HOME"/build-tools/*/aapt2 | sort -V | tail -1)
+          if "$AAPT2" dump badging YERAL-PRO.apk | grep -q "application-debuggable"; then
+            echo "::error::La APK sigue siendo depurable. No se publica."
+            exit 1
+          fi
+          echo "OK: la APK no es depurable."
+
       - name: Guardar registro de errores
         if: failure()
         uses: actions/upload-artifact@v4
@@ -113,4 +119,5 @@ jobs:
           name: YERAL-PRO ${{ github.run_number }}
           files: YERAL-PRO.apk
           make_latest: true
+
           
