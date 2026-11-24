@@ -106,3 +106,9 @@ Instalación de actualizaciones dentro de la app, cifrado y ajustes de compilaci
 - El workflow solo se ejecuta a mano (Actions → Run workflow); ya no compila en cada push a main.
 - Ya estaban bien y no se tocaron: firma fija obligatoria (secreto YERAL_KEYSTORE_B64 con verificación de huella), PIN con SHA-256, selector de Buffer del reproductor nativo y cadena ExoPlayer → VLC → MPV.
 - No se pudo compilar aquí (sin Internet): ejecutar el workflow y probar la actualización con dos builds seguidos.
+
+
+APK no depurable:
+- La APK ya no es depurable (debuggable false). Sigue firmada con la misma clave fija, así que se instala encima de la versión anterior sin desinstalar. Con esto adb/run-as ya no puede leer los datos guardados de la app.
+- El workflow verifica con aapt2 que la APK no sea depurable y, si lo es, no publica.
+- No se activó R8/minify a propósito: VLC y MPV se cargan por reflexión y se romperían.

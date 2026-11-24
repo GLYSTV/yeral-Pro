@@ -3356,6 +3356,18 @@ REPOS
 
 cd android
 chmod +x gradlew
+# APK NO depurable: misma firma fija, pero sin acceso por adb (run-as) a servidor/usuario/contraseña guardados.
+cat >> app/build.gradle <<'NODEBUG'
+
+// YERAL: APK no depurable
+android {
+    buildTypes {
+        debug {
+            debuggable false
+        }
+    }
+}
+NODEBUG
 # Firma fija: la misma clave en todas las versiones (así Android permite actualizar encima).
 if [ -n "${YERAL_KEYSTORE:-}" ] && [ -f "$YERAL_KEYSTORE" ]; then
 cat >> app/build.gradle <<'SIGN'
