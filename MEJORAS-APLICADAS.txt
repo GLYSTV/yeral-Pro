@@ -94,3 +94,15 @@ Limpieza y estabilidad (24-11-2026):
 - index.html pasa de ~1,25 MB a ~0,67 MB: se quitaron dos copias de una imagen de 289 KB (variable --emb) que la hoja de estilos final ya sobrescribía; no cambia el aspecto.
 - La búsqueda de actualización tiene tiempo máximo (15 s) y avisa si GitHub no responde.
 - Se eliminan del repositorio archivos que la compilación no usa: yeral-Pro.zip (copia anidada) y las fuentes open_sans.ttf / open_sans_regular.ttf de la raíz (la compilación usa la carpeta fonts/).
+
+
+Instalación de actualizaciones dentro de la app, cifrado y ajustes de compilación:
+- Actualizar: el botón "Descargar APK" ahora descarga la APK desde GitHub Releases dentro de la app (con porcentaje) y abre el instalador de Android (plugin ApkUpdater). Solo acepta github.com/githubusercontent.com, comprueba que la APK sea com.yeral.app y que pese más de 1 MB. Si el plugin no existe, abre la descarga en el navegador como antes.
+- La comparación de versión usa el número final de la etiqueta (yeral-pro-N), no todos los dígitos.
+- Permiso REQUEST_INSTALL_PACKAGES y FileProvider agregados al manifest (patch_tv.py). La primera vez Android pedirá "Permitir instalar apps" para YERAL-Pro.
+- index.html va cifrado dentro del APK (tools/protect.mjs, clave aleatoria por compilación). Se aplica al final de la preparación web.
+- allowBackup=false: Android ya no copia servidor/usuario/contraseña a copias de seguridad.
+- Corrección: el manifest declaraba leanback como obligatorio (required=true) aunque este archivo decía lo contrario; ahora es required=false (celular, Google TV y TV box).
+- El workflow solo se ejecuta a mano (Actions → Run workflow); ya no compila en cada push a main.
+- Ya estaban bien y no se tocaron: firma fija obligatoria (secreto YERAL_KEYSTORE_B64 con verificación de huella), PIN con SHA-256, selector de Buffer del reproductor nativo y cadena ExoPlayer → VLC → MPV.
+- No se pudo compilar aquí (sin Internet): ejecutar el workflow y probar la actualización con dos builds seguidos.

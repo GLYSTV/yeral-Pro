@@ -2144,7 +2144,7 @@ body{background:radial-gradient(1100px 520px at 85% -12%,rgba(47,140,255,.22),tr
       if(!response.ok)throw new Error('GitHub HTTP '+response.status);
       var release=await response.json();
       if(release.draft||release.prerelease)throw new Error('La última publicación no es una versión estable.');
-      var tag=String(release.tag_name||release.name||'');var nums=(tag.match(/\d+/g)||[]).join('');var remote=nums?parseInt(nums,10):NaN;
+      var tag=String(release.tag_name||release.name||'');var mt=/(\d+)\s*$/.exec(tag);var remote=mt?parseInt(mt[1],10):NaN;
       var assets=Array.isArray(release.assets)?release.assets:[];var apk=assets.find(function(x){return /\.apk$/i.test(x.name||'')});
       if(!apk)throw new Error('La última Release no tiene una APK adjunta.');
       if(Number.isFinite(remote)&&remote>YERAL_CURRENT_VERSION){status('Nueva versión disponible: '+tag+'.');showUpdate(release,apk)}
@@ -2157,7 +2157,20 @@ body{background:radial-gradient(1100px 520px at 85% -12%,rgba(47,140,255,.22),tr
   var check=document.getElementById('yuCheckButton');if(check)check.addEventListener('click',function(){yeralCheckUpdate(true)});
   var later=document.getElementById('yeralUpdateLater');if(later)later.addEventListener('click',closeUpdate);
   var dl=document.getElementById('yeralUpdateDownload');
-  function openApk(u){try{var A=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.App;if(A&&A.openUrl){A.openUrl({url:u});return}}catch(e){}location.href=u}
+  function openApk(u){
+    var btn=document.getElementById('yeralUpdateDownload'),orig=btn?btn.textContent:'';
+    function back(t){if(btn)btn.textContent=t||orig}
+    function fallback(){try{var A=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.App;if(A&&A.openUrl){A.openUrl({url:u});return}}catch(e){}location.href=u}
+    var C=window.Capacitor,P=null;
+    try{if(C&&C.registerPlugin&&((C.isNativePlatform&&C.isNativePlatform())||(C.getPlatform&&C.getPlatform()!=='web')))P=C.registerPlugin('ApkUpdater')}catch(e){}
+    if(!P||!P.install){fallback();return}
+    var L=null;
+    try{Promise.resolve(P.addListener('progress',function(e){var p=Math.round((e&&e.percent)||0);if(btn)btn.textContent='Descargando '+p+'%';status('Descargando actualización… '+p+'%')})).then(function(h){L=h}).catch(function(){})}catch(e){}
+    if(btn)btn.textContent='Descargando…';
+    P.install({url:u}).then(function(){back('Abriendo instalador…');status('Android te pedirá confirmar la instalación.')})
+    .catch(function(err){back();var m=(err&&err.message)||'No se pudo descargar la actualización';status(m);try{toast(m)}catch(e){}})
+    .then(function(){try{L&&L.remove&&L.remove()}catch(e){}});
+  }
   if(dl)dl.addEventListener('click',function(e){e.preventDefault();var u=dl.getAttribute('data-url');if(u)openApk(u)});
   /* Control remoto: flechas entre los dos botones, OK pulsa, Atrás cierra (captura: gana a la navegación de fondo) */
   document.addEventListener('keydown',function(e){var bx=document.getElementById('yeralUpdateBox');if(!bx||!bx.classList.contains('show')||!dl||!later)return;

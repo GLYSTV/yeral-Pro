@@ -7,6 +7,24 @@ mf = os.path.join(root, "android/app/src/main/AndroidManifest.xml")
 if not os.path.exists(mf): sys.exit("No encuentro " + mf + " (ejecuta desde la raiz del repo)")
 s = open(mf, encoding="utf-8").read()
 
+
+# 0) permiso para instalar la actualización descargada
+if "REQUEST_INSTALL_PACKAGES" not in s:
+    s = re.sub(r'(<manifest[^>]*>\s*\n)', lambda m: m.group(1) + '    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />\n', s, count=1)
+
+# 0.1) seguridad: sin copias de seguridad de ADB/nube (guardan servidor/usuario/contraseña)
+s = re.sub(r'android:allowBackup="[^"]*"', 'android:allowBackup="false"', s)
+if 'android:allowBackup' not in s:
+    s = re.sub(r'<application', '<application\n        android:allowBackup="false"', s, count=1)
+
+# 0.2) FileProvider para abrir la APK descargada (la plantilla de Capacitor ya lo trae; esto es solo respaldo)
+if ".fileprovider" not in s:
+    prov = ('        <provider android:name="androidx.core.content.FileProvider" android:authorities="${applicationId}.fileprovider" '
+            'android:exported="false" android:grantUriPermissions="true">\n'
+            '            <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/file_paths" />\n'
+            '        </provider>\n')
+    s = s.replace('</application>', prov + '    </application>', 1)
+
 # 1) uses-feature
 feats = ('    <uses-feature android:name="android.software.leanback" android:required="false" />\n'
          '    <uses-feature android:name="android.hardware.touchscreen" android:required="false" />\n')

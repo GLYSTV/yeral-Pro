@@ -41,6 +41,9 @@ else
   echo "AVISO: no se pudo descargar Poppins; se usa Google Fonts"
 fi
 
+# Cifra index.html dentro del APK (debe ser lo ÚLTIMO que se le haga a www/index.html)
+if [ -f tools/protect.mjs ]; then node tools/protect.mjs www/index.html; fi
+
 # 2) Proyecto Android
 npx cap add android
 
@@ -72,6 +75,7 @@ public class MainActivity extends BridgeActivity {
     });
     registerPlugin(NativePlayerPlugin.class);
     registerPlugin(RemoteSetupPlugin.class);
+    registerPlugin(ApkUpdaterPlugin.class);
     super.onCreate(savedInstanceState);
     try {
       String last = crashSp.getString("last", "");
@@ -106,6 +110,117 @@ public class MainActivity extends BridgeActivity {
   }
 }
 JAVA
+
+cat > $PKG/ApkUpdaterPlugin.java <<'UPDJAVA'
+package com.yeral.app;
+
+import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.net.Uri;
+import android.os.Build;
+import android.provider.Settings;
+import androidx.core.content.FileProvider;
+import com.getcapacitor.JSObject;
+import com.getcapacitor.Plugin;
+import com.getcapacitor.PluginCall;
+import com.getcapacitor.PluginMethod;
+import com.getcapacitor.annotation.CapacitorPlugin;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+/** Descarga la APK nueva desde GitHub Releases y abre el instalador de Android (sin salir de la app). */
+@CapacitorPlugin(name = "ApkUpdater")
+public class ApkUpdaterPlugin extends Plugin {
+
+  private static boolean okHost(String h) {
+    if (h == null) return false;
+    h = h.toLowerCase();
+    return h.equals("github.com") || h.endsWith(".github.com") || h.endsWith(".githubusercontent.com");
+  }
+
+  @PluginMethod
+  public void install(final PluginCall call) {
+    final String url = call.getString("url");
+    if (url == null || !url.startsWith("https://")) { call.reject("URL de actualización no válida"); return; }
+    try {
+      if (!okHost(new URL(url).getHost())) { call.reject("Origen de actualización no permitido"); return; }
+    } catch (Exception e) { call.reject("URL de actualización no válida"); return; }
+
+    if (Build.VERSION.SDK_INT >= 26 && !getContext().getPackageManager().canRequestPackageInstalls()) {
+      Intent s = new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:" + getContext().getPackageName()));
+      s.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+      getContext().startActivity(s);
+      call.reject("Activa \"Permitir instalar apps\" para YERAL-Pro y pulsa Actualizar otra vez");
+      return;
+    }
+
+    new Thread(() -> {
+      HttpURLConnection c = null;
+      try {
+        File dir = new File(getContext().getCacheDir(), "updates");
+        if (!dir.exists()) dir.mkdirs();
+        File out = new File(dir, "YERAL-PRO.apk");
+        if (out.exists()) out.delete();
+
+        c = (HttpURLConnection) new URL(url).openConnection();
+        c.setConnectTimeout(20000);
+        c.setReadTimeout(30000);
+        c.connect();
+        if (!okHost(c.getURL().getHost())) throw new Exception("Redirección no permitida");
+        if (c.getResponseCode() != 200) throw new Exception("HTTP " + c.getResponseCode());
+        long total = c.getContentLengthLong();
+        long done = 0;
+        int last = -1;
+        try (InputStream in = c.getInputStream(); FileOutputStream os = new FileOutputStream(out)) {
+          byte[] buf = new byte[32768];
+          int n;
+          while ((n = in.read(buf)) > 0) {
+            os.write(buf, 0, n);
+            done += n;
+            if (total > 0) {
+              int p = (int) (done * 100 / total);
+              if (p != last) {
+                last = p;
+                JSObject o = new JSObject();
+                o.put("percent", p);
+                notifyListeners("progress", o);
+              }
+            }
+          }
+        }
+        if (out.length() < 1024 * 1024) throw new Exception("Archivo incompleto");
+
+        // Debe ser nuestra misma app (Android además exige la misma firma)
+        PackageInfo pi = getContext().getPackageManager().getPackageArchiveInfo(out.getAbsolutePath(), 0);
+        if (pi == null || !getContext().getPackageName().equals(pi.packageName)) throw new Exception("El APK descargado no es de YERAL-Pro");
+
+        Uri uri = FileProvider.getUriForFile(getContext(), getContext().getPackageName() + ".fileprovider", out);
+        Intent i = new Intent(Intent.ACTION_VIEW);
+        i.setDataAndType(uri, "application/vnd.android.package-archive");
+        i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
+        getContext().startActivity(i);
+        call.resolve();
+      } catch (Exception e) {
+        call.reject(e.getMessage() == null ? "No se pudo descargar la actualización" : e.getMessage());
+      } finally {
+        if (c != null) c.disconnect();
+      }
+    }).start();
+  }
+}
+UPDJAVA
+
+mkdir -p android/app/src/main/res/xml
+cat > android/app/src/main/res/xml/file_paths.xml <<'XMLPATHS'
+<?xml version="1.0" encoding="utf-8"?>
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <external-path name="my_images" path="." />
+    <cache-path name="my_cache_images" path="." />
+</paths>
+XMLPATHS
 
 cat > $PKG/NativePlayerPlugin.java <<'JAVA'
 package com.yeral.app;
@@ -3117,7 +3232,7 @@ import sys
 p=sys.argv[1]
 s=open(p,encoding='utf-8').read()
 if 'android.software.leanback' not in s:
-    s=s.replace('<application','<uses-feature android:name="android.hardware.touchscreen" android:required="false"/>\n    <uses-feature android:name="android.software.leanback" android:required="true"/>\n    <application',1)
+    s=s.replace('<application','<uses-feature android:name="android.hardware.touchscreen" android:required="false"/>\n    <uses-feature android:name="android.software.leanback" android:required="false"/>\n    <application',1)
 if 'LEANBACK_LAUNCHER' not in s:
     s=s.replace('<category android:name="android.intent.category.LAUNCHER" />','<category android:name="android.intent.category.LAUNCHER" />\n                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />',1)
 open(p,'w',encoding='utf-8').write(s)
