@@ -88,3 +88,9 @@ YERAL-Pro REFERENCIA (22-11-2026) — diseño igual a la imagen de referencia:
 - Música y Radio abren el buscador global con esa palabra; Continuar viendo abre el historial. El botón «Listas» del menú se ocultó (sigue en Configuración > Cambiar de lista).
 - Compatibilidad: celular, Google TV, Android TV, TV box y Fire TV (leanback y pantalla táctil opcionales en el manifest). La calidad HD/Full HD/4K/8K depende de la fuente.
 - No cambió la lógica de login, listas, QR, perfiles y reproductores. No se pudo compilar el APK aquí: compilar con GitHub Actions (build.yml).
+
+
+Limpieza y estabilidad (24-11-2026):
+- index.html pasa de ~1,25 MB a ~0,67 MB: se quitaron dos copias de una imagen de 289 KB (variable --emb) que la hoja de estilos final ya sobrescribía; no cambia el aspecto.
+- La búsqueda de actualización tiene tiempo máximo (15 s) y avisa si GitHub no responde.
+- Se eliminan del repositorio archivos que la compilación no usa: yeral-Pro.zip (copia anidada) y las fuentes open_sans.ttf / open_sans_regular.ttf de la raíz (la compilación usa la carpeta fonts/).
