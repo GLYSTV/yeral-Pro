@@ -1075,6 +1075,10 @@ if($('br').classList.contains('vm')){if(c.vid&&!S.ep){openDt(c);return}if(X.ext|
 var ck=key(c),now=Date.now(),sameTap=lastChannelTap.key===ck&&(now-lastChannelTap.time)<=500;
 lastChannelTap={key:ck,time:now};
 if(S.cur&&key(S.cur)==ck&&!NP&&!X.ext){if(sameTap){lastChannelTap.time=0;setFs(true)}return}
+/* APK: un toque reproduce en el reproductor de la columna derecha; segundo toque al mismo canal = pantalla completa nativa */
+if(NP&&!X.ext&&c.type==='live'){
+ if(S.cur&&key(S.cur)==ck&&S.cur.inl){c.inl=0;c.fb=0;try{stopPv()}catch(x){}play(c);return}
+ c.inl=1;c.fb=0;play(c);return}
 play(c)};
 var seT=0,seBase=null,seAll=null;
 function seWide(){return (S.mode=='vod'||S.mode=='series')&&!S.ep&&S.cat!=='__cw'&&S.cat!=='__rec'&&String(S.cat).indexOf('__fav')!==0&&S.cat!=='__all'}
@@ -1157,6 +1161,7 @@ function mask(u){try{var x=new URL(u),p=x.pathname.split('/');if(p.length>=4&&/^
 function setPvLoading(on,label){var e=$('pvh');if(!e)return;e.textContent=label|| (on?'Conectando con el servidor…':'');e.classList.toggle('loading',!!on);e.style.display=on?'inline-flex':'none'}
 function pErrClear(){var o=$('pvE');if(o)o.style.display='none'}
 function pErr(t,d,u){
+if(S.cur&&S.cur.inl&&NP&&!S.cur.fb&&S.cur.type==='live'&&!dtOpen()){var cL=S.cur;cL.inl=0;cL.fb=1;setTimeout(function(){try{stopPv()}catch(x){}play(cL)},0);return}
 if(S.cur&&S.cur.inl&&NP&&!S.cur.fb&&dtOpen()){var c2=Object.assign({},S.cur,{inl:0,fb:1}),why=String(d||t||'').slice(0,140);setTimeout(function(){dtFbNative(c2,why)},0);return}
 setPvLoading(false);
 /* Mensaje sencillo para el usuario: los detalles técnicos quedan solo en la consola. */
@@ -2665,6 +2670,113 @@ if(k=='share'){try{if(navigator.share)navigator.share({title:'Yeral-PRO',text:'F
 var W=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'],M=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 function d(){var n=new Date(),t=W[n.getDay()]+', '+n.getDate()+' '+M[n.getMonth()];[].forEach.call(document.querySelectorAll('.cl'),function(e){if(e.getAttribute('data-d')!==t)e.setAttribute('data-d',t)})}
 d();setInterval(d,2000);
+})();
+</script>
+
+<style id="yeral-landscape-12filas">
+/* ===== Pantalla 100% horizontal + 14 carpetas visibles en la primera columna =====
+   La altura de cada carpeta (--catH) la calcula el script de abajo para que quepan
+   14 filas sin importar el tamaño de la pantalla. Se conservan buscador, título y hora. */
+html body #br .brtop{padding:4px 12px!important;min-height:0!important;gap:8px!important;align-items:center!important}
+html body #br .brtop .ib{width:34px!important;height:34px!important;min-width:34px!important;min-height:34px!important;padding:0!important;flex:none!important;border-radius:10px!important}
+html body #br .brtop .ib svg{width:18px!important;height:18px!important}
+html body #br .brtop>.t{font-size:16px!important;line-height:1.1!important;margin:0 0 0 4px!important}
+html body #br .brtop .cl{font-size:24px!important;line-height:1!important;margin:0 0 0 8px!important;letter-spacing:0!important}
+html body #br .brb{padding:0 10px 8px!important;gap:8px!important}
+html body #br #cc{display:block!important;padding:3px!important;gap:0!important;overflow-x:hidden!important;overflow-y:auto!important;scrollbar-width:none}
+html body #br #cc::-webkit-scrollbar{display:none}
+html body #br #cc .cth{height:var(--catH,27px)!important;min-height:0!important;margin:0 0 2px!important;padding:0 6px!important;display:flex!important;align-items:center!important;font-size:11px!important;line-height:1!important;white-space:nowrap!important;overflow:hidden!important}
+html body #br #cc .cat,html body #br #cc .cat.allch{
+ height:var(--catH,27px)!important;min-height:0!important;max-height:none!important;
+ margin:0 0 2px!important;padding:0 8px!important;gap:6px!important;
+ display:flex!important;align-items:center!important;box-sizing:border-box!important;
+ white-space:nowrap!important;overflow:hidden!important;line-height:1!important;
+ font-size:clamp(10px,calc(var(--catH,27px) * .42),14px)!important;border-radius:8px!important;flex:none!important}
+html body #br #cc .cat small{position:static!important;top:auto!important;left:auto!important;transform:none!important;min-width:14px!important;font-size:inherit!important;line-height:1!important;flex:none!important;display:inline-block!important;align-self:center!important}
+html body #br #cc .cat span{flex:1!important;min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+html body #br #cc .cat em{flex:none!important;font-size:calc(var(--catH,27px) * .36)!important;line-height:1!important;padding:2px 6px!important}
+
+
+/* TV en vivo: el panel de la derecha es el reproductor (lo que voy a ver / lo que estoy viendo) */
+html.np body #br:not(.vm) #pv:not(.fsx){display:grid!important}
+html body #br:not(.vm) #rt{display:flex!important;flex-direction:column!important;gap:0!important;padding:0!important;min-height:0!important;overflow:hidden!important;background:transparent!important;border:0!important;box-shadow:none!important}
+html body #br:not(.vm) #rt{gap:8px!important;padding:2px!important}
+html body #br:not(.vm) #rt #pv:not(.fsx){flex:0 0 auto!important;width:100%!important;height:auto!important;min-height:0!important;max-height:none!important;aspect-ratio:16/9!important;border-radius:14px!important}
+/* sin botones ni comandos dentro del cuadro pequeño (solo video); los controles quedan en pantalla completa */
+html body #br:not(.vm) #rt #pv:not(.fsx) #pvc{display:none!important}
+/* debajo del cuadro: lo que estoy viendo y lo que viene */
+html body #br:not(.vm) #rt #inf{display:block!important;flex:1 1 auto!important;min-height:0!important;overflow:hidden!important;padding:7px 10px!important;border-radius:14px!important}
+html body #br:not(.vm) #rt #inf>b{display:block;font-size:13px!important;line-height:1.15!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html body #br:not(.vm) #rt #inf .sub{display:none!important}
+html body #br:not(.vm) #rt #inf .eplive{padding:6px 8px!important;margin-top:6px!important;border-radius:10px!important}
+html body #br:not(.vm) #rt #inf .eplb{font-size:9px!important;padding:2px 6px!important;background:#2f86ff!important;color:#fff!important}
+html body #br:not(.vm) #rt #inf .eplt{font-size:11px!important}
+html body #br:not(.vm) #rt #inf .epln{font-size:13px!important;margin-top:4px!important;-webkit-line-clamp:1!important}
+html body #br:not(.vm) #rt #inf .eplbar{margin-top:5px!important;height:4px!important}
+html body #br:not(.vm) #rt #inf .eplq{font-size:10px!important;margin-top:3px!important}
+html body #br:not(.vm) #rt #inf .epnx{font-size:10px!important;margin-top:7px!important}
+html body #br:not(.vm) #rt #inf .ep{font-size:11px!important;line-height:1.25!important;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* Películas y Series: misma columna de 12 carpetas, más ancha para leer los nombres */
+html body #br.vm .brb{grid-template-columns:225px minmax(0,1fr)!important}
+html body #br.vm #cc .cth{letter-spacing:0!important;text-transform:none!important;font-size:12px!important;overflow:hidden!important;text-overflow:ellipsis!important}
+/* Segunda columna (canales): 12 filas visibles */
+html body #br #ls:not(.grid){padding:3px!important;overflow-x:hidden!important;overflow-y:auto!important;scrollbar-width:none}
+html body #br #ls:not(.grid)::-webkit-scrollbar{display:none}
+html body #br #ls:not(.grid) .ch{
+ height:var(--chH,34px)!important;min-height:0!important;max-height:none!important;
+ margin:0 0 2px!important;padding:0 8px!important;gap:8px!important;box-sizing:border-box!important;
+ display:flex!important;align-items:center!important;overflow:hidden!important;flex:none!important;border-radius:9px!important}
+html body #br #ls:not(.grid) .ch small{position:static!important;transform:none!important;min-width:22px!important;font-size:clamp(9px,calc(var(--chH,34px) * .36),13px)!important;line-height:1!important}
+html body #br #ls:not(.grid) .ch img,html body #br #ls:not(.grid) .ch .ph{
+ position:static!important;width:calc(var(--chH,34px) - 8px)!important;height:calc(var(--chH,34px) - 8px)!important;
+ min-width:calc(var(--chH,34px) - 8px)!important;font-size:calc(var(--chH,34px) * .45)!important;border-radius:6px!important;flex:none!important}
+html body #br #ls:not(.grid) .ch .nm{flex:1!important;min-width:0!important;line-height:1!important;
+ font-size:clamp(10px,calc(var(--chH,34px) * .42),15px)!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+html body #br #ls:not(.grid) .ch .fv{font-size:calc(var(--chH,34px) * .55)!important;line-height:1!important;padding:0 4px!important}
+</style>
+<script id="yeral-landscape-12filas-js">
+(function(){
+ var N=12;                 /* carpetas y canales visibles en las dos columnas */
+ var GAP=2;                /* separación entre filas (px) */
+ function fit(){
+  try{
+   var br=document.getElementById('br'),cc=document.getElementById('cc');
+   if(!br||!cc||br.classList.contains('hide'))return;
+   var cs=getComputedStyle(cc);
+   var inner=cc.clientHeight-parseFloat(cs.paddingTop||0)-parseFloat(cs.paddingBottom||0);
+   if(!(inner>0))return;
+   var rows=N+(cc.querySelector('.cth')?1:0);
+   var h=(inner-rows*GAP)/rows-0.12;
+   h=Math.floor(Math.max(18,Math.min(h,44))*100)/100;
+   cc.style.setProperty('--catH',h+'px');
+   var ls=document.getElementById('ls');
+   if(ls&&!ls.classList.contains('grid')){
+    var ls_cs=getComputedStyle(ls);
+    var li=ls.clientHeight-parseFloat(ls_cs.paddingTop||0)-parseFloat(ls_cs.paddingBottom||0);
+    if(li>0){
+     var lh=(li-N*GAP)/N-0.12;
+     lh=Math.floor(Math.max(20,Math.min(lh,48))*100)/100;
+     ls.style.setProperty('--chH',lh+'px');
+    }
+   }
+  }catch(e){}
+ }
+ function later(){fit();requestAnimationFrame(fit);setTimeout(fit,120);setTimeout(fit,600)}
+ window.addEventListener('resize',later);
+ window.addEventListener('orientationchange',later);
+ document.addEventListener('DOMContentLoaded',function(){
+  var cc=document.getElementById('cc'),br=document.getElementById('br');
+  var lsEl=document.getElementById('ls');
+  if(window.ResizeObserver&&cc){var ro=new ResizeObserver(fit);ro.observe(cc);if(lsEl)ro.observe(lsEl)}
+  if(window.MutationObserver){
+   if(cc)new MutationObserver(later).observe(cc,{childList:true});
+   if(lsEl)new MutationObserver(later).observe(lsEl,{childList:true,attributes:true,attributeFilter:['class']});
+   if(br)new MutationObserver(later).observe(br,{attributes:true,attributeFilter:['class']});
+  }
+  later();
+ });
+ /* Bloqueo horizontal (donde el navegador lo permita; en la APK lo hace el AndroidManifest) */
+ try{if(screen.orientation&&screen.orientation.lock)screen.orientation.lock('landscape').catch(function(){})}catch(e){}
 })();
 </script>
 </body>

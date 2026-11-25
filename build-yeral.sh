@@ -3222,8 +3222,22 @@ COLXML=android/app/src/main/res/values/colors.xml
 [ -f "$COLXML" ] && sed -i -E 's#(<color name="colorPrimary">)[^<]*(</color>)#\1\#020712\2#; s#(<color name="colorPrimaryDark">)[^<]*(</color>)#\1\#020712\2#; s#(<color name="colorAccent">)[^<]*(</color>)#\1\#FFC928\2#' "$COLXML" || true
 
 sed -i 's#<application#<application android:usesCleartextTraffic="true"#' $MAN
-sed -i 's#</application>#    <activity android:name=".PlayerActivity" android:exported="false" android:configChanges="orientation|screenSize|keyboardHidden|screenLayout|smallestScreenSize" android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" />\n    </application>#' $MAN
-sed -i 's#</application>#    <activity android:name=".AltPlayerActivity" android:exported="false" android:configChanges="orientation|screenSize|keyboardHidden|screenLayout|smallestScreenSize" android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" />\n    </application>#' $MAN
+# Pantalla 100% horizontal (app principal; los reproductores se bloquean abajo en su etiqueta)
+python3 - "$MAN" <<'LANDPY'
+import re,sys
+p=sys.argv[1]
+s=open(p,encoding='utf-8').read()
+def fix(m):
+    t=m.group(0)
+    if 'android:screenOrientation' in t:
+        return re.sub(r'android:screenOrientation="[^"]*"','android:screenOrientation="sensorLandscape"',t)
+    return t.replace('<activity','<activity android:screenOrientation="sensorLandscape"',1)
+s2=re.sub(r'<activity\b[^>]*android:name="[^"]*MainActivity"[^>]*>',fix,s,count=1,flags=re.S)
+open(p,'w',encoding='utf-8').write(s2)
+print('landscape ok' if 'sensorLandscape' in s2 else 'landscape NO aplicado')
+LANDPY
+sed -i 's#</application>#    <activity android:name=".PlayerActivity" android:exported="false" android:screenOrientation="sensorLandscape" android:configChanges="orientation|screenSize|keyboardHidden|screenLayout|smallestScreenSize" android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" />\n    </application>#' $MAN
+sed -i 's#</application>#    <activity android:name=".AltPlayerActivity" android:exported="false" android:screenOrientation="sensorLandscape" android:configChanges="orientation|screenSize|keyboardHidden|screenLayout|smallestScreenSize" android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" />\n    </application>#' $MAN
 sed -i '/^dependencies {/a\    implementation "androidx.media3:media3-exoplayer:1.9.0"\n    implementation "androidx.media3:media3-exoplayer-hls:1.9.0"\n    implementation "androidx.media3:media3-exoplayer-dash:1.9.0"\n    implementation "androidx.media3:media3-exoplayer-smoothstreaming:1.9.0"\n    implementation "androidx.media3:media3-exoplayer-rtsp:1.9.0"\n    implementation "androidx.media3:media3-ui:1.9.0"\n    implementation "org.jellyfin.media3:media3-ffmpeg-decoder:1.9.0+1"\n    implementation "org.videolan.android:libvlc-all:3.7.6"\n    implementation "dev.jdtech.mpv:libmpv:1.0.0"' android/app/build.gradle
 
 # Compatibilidad celular Android + Google TV / TV box (touch y leanback opcionales)
