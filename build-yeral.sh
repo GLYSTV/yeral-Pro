@@ -222,6 +222,116 @@ cat > android/app/src/main/res/xml/file_paths.xml <<'XMLPATHS'
 </paths>
 XMLPATHS
 
+cat > $PKG/NetKit.java <<'NETJAVA'
+package com.yeral.app;
+
+import androidx.media3.datasource.okhttp.OkHttpDataSource;
+import java.net.InetAddress;
+import java.net.URI;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import okhttp3.Dns;
+import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
+import okhttp3.dnsoverhttps.DnsOverHttps;
+
+/* Red del reproductor: DNS rápido con caché (sistema y DNS cifrado de Cloudflare a la vez; gana el primero que responde)
+   y pre-resolución de los canales vecinos para que el cambio de canal conecte antes. */
+final class NetKit {
+  private static final long TTL_MS = 3 * 60 * 1000L;
+  private static final ConcurrentHashMap<String, Object[]> CACHE = new ConcurrentHashMap<>();
+  private static final ExecutorService POOL = Executors.newCachedThreadPool();
+  private static DnsOverHttps doh;
+  private static boolean dohTried = false;
+  private static OkHttpClient base;
+
+  private static synchronized DnsOverHttps doh() {
+    if (dohTried) return doh;
+    dohTried = true;
+    try {
+      OkHttpClient boot = new OkHttpClient.Builder()
+          .connectTimeout(3, TimeUnit.SECONDS)
+          .readTimeout(3, TimeUnit.SECONDS)
+          .build();
+      doh = new DnsOverHttps.Builder()
+          .client(boot)
+          .url(HttpUrl.get("https://1.1.1.1/dns-query"))
+          .bootstrapDnsHosts(
+              InetAddress.getByAddress(new byte[]{1, 1, 1, 1}),
+              InetAddress.getByAddress(new byte[]{1, 0, 0, 1}))
+          .includeIPv6(false)
+          .build();
+    } catch (Throwable t) {
+      doh = null;
+    }
+    return doh;
+  }
+
+  @SuppressWarnings("unchecked")
+  private static final Dns DNS = new Dns() {
+    @Override
+    public List<InetAddress> lookup(final String host) throws UnknownHostException {
+      long now = System.currentTimeMillis();
+      Object[] e = CACHE.get(host);
+      if (e != null && (Long) e[0] > now) return (List<InetAddress>) e[1];
+      List<InetAddress> r = null;
+      try {
+        List<Callable<List<InetAddress>>> jobs = new ArrayList<>();
+        jobs.add(() -> Dns.SYSTEM.lookup(host));
+        final DnsOverHttps d = doh();
+        if (d != null) jobs.add(() -> d.lookup(host));
+        r = POOL.invokeAny(jobs, 6, TimeUnit.SECONDS);
+      } catch (Throwable ex) {
+        r = null;
+      }
+      if (r == null || r.isEmpty()) {
+        if (e != null) return (List<InetAddress>) e[1];
+        throw new UnknownHostException("No se pudo resolver " + host);
+      }
+      CACHE.put(host, new Object[]{now + TTL_MS, r});
+      return r;
+    }
+  };
+
+  static synchronized OkHttpClient client() {
+    if (base == null) {
+      base = new OkHttpClient.Builder()
+          .dns(DNS)
+          .followRedirects(true)
+          .followSslRedirects(true)
+          .retryOnConnectionFailure(true)
+          .build();
+    }
+    return base;
+  }
+
+  static OkHttpDataSource.Factory factory(String userAgent, int connectMs, int readMs) {
+    OkHttpClient c = client().newBuilder()
+        .connectTimeout(connectMs, TimeUnit.MILLISECONDS)
+        .readTimeout(readMs, TimeUnit.MILLISECONDS)
+        .build();
+    return new OkHttpDataSource.Factory(c).setUserAgent(userAgent);
+  }
+
+  /* Solo resuelve el nombre del servidor (no abre el canal, para no gastar conexiones del proveedor) */
+  static void warm(final String url) {
+    if (url == null) return;
+    POOL.execute(() -> {
+      try {
+        String h = URI.create(url.trim()).getHost();
+        if (h != null) DNS.lookup(h);
+      } catch (Throwable t) { /* opcional */ }
+    });
+  }
+}
+NETJAVA
+
 cat > $PKG/NativePlayerPlugin.java <<'JAVA'
 package com.yeral.app;
 
@@ -466,11 +576,7 @@ public class NativePlayerPlugin extends Plugin {
 
   private void ensurePlayer() {
     if (player != null) return;
-    DefaultHttpDataSource.Factory http = new DefaultHttpDataSource.Factory()
-        .setUserAgent("VLC/3.0.18 LibVLC/3.0.18")
-        .setAllowCrossProtocolRedirects(true)
-        .setConnectTimeoutMs(8000)
-        .setReadTimeoutMs(15000);
+    androidx.media3.datasource.DataSource.Factory http = NetKit.factory("VLC/3.0.18 LibVLC/3.0.18", 8000, 15000);
     DefaultRenderersFactory rf = new DefaultRenderersFactory(getActivity())
         .setEnableDecoderFallback(true)
         .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER);
@@ -1056,12 +1162,7 @@ public class PlayerActivity extends Activity {
       simplifyControls(pv);
     });
 
-    DefaultHttpDataSource.Factory http =
-        new DefaultHttpDataSource.Factory()
-            .setUserAgent("VLC/3.0.18 LibVLC/3.0.18")
-            .setAllowCrossProtocolRedirects(true)
-            .setConnectTimeoutMs(8000)
-            .setReadTimeoutMs(15000);
+    androidx.media3.datasource.DataSource.Factory http = NetKit.factory("VLC/3.0.18 LibVLC/3.0.18", 8000, 15000);
 
     DefaultRenderersFactory rf =
         new DefaultRenderersFactory(this)
@@ -1396,6 +1497,8 @@ public class PlayerActivity extends Activity {
     saveResume();
     chIdx = (chIdx + d + cu.length) % cu.length;
     url = cu[chIdx];
+    NetKit.warm(cu[(chIdx + 1) % cu.length]);
+    NetKit.warm(cu[(chIdx - 1 + cu.length) % cu.length]);
     String nm = chIdx < ct.length ? ct[chIdx] : "";
     qUrls = new String[]{url};
     qTitles = new String[]{nm};
@@ -3332,7 +3435,7 @@ print('landscape ok' if 'sensorLandscape' in s2 else 'landscape NO aplicado')
 LANDPY
 sed -i 's#</application>#    <activity android:name=".PlayerActivity" android:exported="false" android:screenOrientation="sensorLandscape" android:configChanges="orientation|screenSize|keyboardHidden|screenLayout|smallestScreenSize" android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" />\n    </application>#' $MAN
 sed -i 's#</application>#    <activity android:name=".AltPlayerActivity" android:exported="false" android:screenOrientation="sensorLandscape" android:configChanges="orientation|screenSize|keyboardHidden|screenLayout|smallestScreenSize" android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" />\n    </application>#' $MAN
-sed -i '/^dependencies {/a\    implementation "androidx.media3:media3-exoplayer:1.9.0"\n    implementation "androidx.media3:media3-exoplayer-hls:1.9.0"\n    implementation "androidx.media3:media3-exoplayer-dash:1.9.0"\n    implementation "androidx.media3:media3-exoplayer-smoothstreaming:1.9.0"\n    implementation "androidx.media3:media3-exoplayer-rtsp:1.9.0"\n    implementation "androidx.media3:media3-ui:1.9.0"\n    implementation "org.jellyfin.media3:media3-ffmpeg-decoder:1.9.0+1"\n    implementation "org.videolan.android:libvlc-all:3.7.6"\n    implementation "dev.jdtech.mpv:libmpv:1.0.0"' android/app/build.gradle
+sed -i '/^dependencies {/a\    implementation "androidx.media3:media3-exoplayer:1.9.0"\n    implementation "androidx.media3:media3-exoplayer-hls:1.9.0"\n    implementation "androidx.media3:media3-exoplayer-dash:1.9.0"\n    implementation "androidx.media3:media3-exoplayer-smoothstreaming:1.9.0"\n    implementation "androidx.media3:media3-exoplayer-rtsp:1.9.0"\n    implementation "androidx.media3:media3-ui:1.9.0"\n    implementation "org.jellyfin.media3:media3-ffmpeg-decoder:1.9.0+1"\n    implementation "org.videolan.android:libvlc-all:3.7.6"\n    implementation "dev.jdtech.mpv:libmpv:1.0.0"\n    implementation "androidx.media3:media3-datasource-okhttp:1.9.0"\n    implementation "com.squareup.okhttp3:okhttp:4.12.0"\n    implementation "com.squareup.okhttp3:okhttp-dnsoverhttps:4.12.0"' android/app/build.gradle
 
 # Compatibilidad celular Android + Google TV / TV box (touch y leanback opcionales)
 python3 - "$MAN" <<'TVPY'
