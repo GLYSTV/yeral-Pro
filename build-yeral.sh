@@ -469,12 +469,17 @@ public class NativePlayerPlugin extends Plugin {
     DefaultHttpDataSource.Factory http = new DefaultHttpDataSource.Factory()
         .setUserAgent("VLC/3.0.18 LibVLC/3.0.18")
         .setAllowCrossProtocolRedirects(true)
-        .setConnectTimeoutMs(15000)
+        .setConnectTimeoutMs(8000)
         .setReadTimeoutMs(15000);
     DefaultRenderersFactory rf = new DefaultRenderersFactory(getActivity())
         .setEnableDecoderFallback(true)
         .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER);
+    androidx.media3.exoplayer.DefaultLoadControl pvLc =
+        new androidx.media3.exoplayer.DefaultLoadControl.Builder()
+            .setBufferDurationsMs(10000, 25000, 500, 1500)
+            .build();
     player = new ExoPlayer.Builder(getActivity(), rf)
+        .setLoadControl(pvLc)
         .setMediaSourceFactory(new DefaultMediaSourceFactory(getActivity()).setDataSourceFactory(http))
         .build();
     player.addListener(new Player.Listener() {
@@ -1055,7 +1060,7 @@ public class PlayerActivity extends Activity {
         new DefaultHttpDataSource.Factory()
             .setUserAgent("VLC/3.0.18 LibVLC/3.0.18")
             .setAllowCrossProtocolRedirects(true)
-            .setConnectTimeoutMs(12000)
+            .setConnectTimeoutMs(8000)
             .setReadTimeoutMs(15000);
 
     DefaultRenderersFactory rf =
@@ -1856,12 +1861,12 @@ public class PlayerActivity extends Activity {
         }).show();
   }
 
-  /* ---- Buffer: 0 = Rápido, 1 = Normal (por defecto, igual que antes), 2 = Estable ---- */
+  /* ---- Buffer: 0 = Rápido (por defecto), 1 = Normal, 2 = Estable ---- */
   private static final String[] BUF_NAMES = {"Rápido", "Normal", "Estable"};
 
   private int bufferProfile() {
-    int v = getSharedPreferences("yeral_prefs", MODE_PRIVATE).getInt("buffer", 1);
-    return (v < 0 || v > 2) ? 1 : v;
+    int v = getSharedPreferences("yeral_prefs", MODE_PRIVATE).getInt("buffer", 0);
+    return (v < 0 || v > 2) ? 0 : v;
   }
 
   private static int[] bufferDurations(int profile) {
