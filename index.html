@@ -2779,5 +2779,65 @@ html body #br #ls:not(.grid) .ch .fv{font-size:calc(var(--chH,34px) * .55)!impor
  try{if(screen.orientation&&screen.orientation.lock)screen.orientation.lock('landscape').catch(function(){})}catch(e){}
 })();
 </script>
+<script id="yeral-pv-native">
+/* YERAL-Pro · TV en vivo en la APK: un toque reproduce DENTRO del cuadro; doble toque (o tocar otra vez el mismo canal) lo amplía a pantalla completa */
+(function(){
+  if(typeof NP==='undefined'||!NP||!NP.preview||!NP.fullscreen)return;
+  var ST={on:false,vis:false,full:false,key:'',cur:null,failed:null,boxTap:0,last:null};
+  function $$(i){return document.getElementById(i)}
+  function isLiveBrowse(){var b=$$('br');return b&&!b.classList.contains('hide')&&!b.classList.contains('vm')&&S.mode==='live'}
+  function rect(){var e=$$('pv'),r=e.getBoundingClientRect(),d=window.devicePixelRatio||1,m=3;
+    return{x:Math.round((r.left+m)*d),y:Math.round((r.top+m)*d),w:Math.max(2,Math.round((r.width-2*m)*d)),h:Math.max(2,Math.round((r.height-2*m)*d))}}
+  function urlOf(c){return(Array.isArray(c.urls)&&c.urls.length)?c.urls[0]:c.url}
+  function webStop(){try{playSeq++;clearTimeout(play.wd);clearTimeout(stallTimer)}catch(e){}
+    try{vid.pause();vid.removeAttribute('src');vid.load()}catch(e){}
+    try{if(hls){hls.destroy();hls=null}}catch(e){}}
+  function hint(t){var h=$$('pvh');if(!h)return;if(t){h.textContent=t;h.classList.remove('loading');h.style.display='inline-flex'}else h.style.display='none'}
+  function hide(){if(ST.vis){ST.vis=false;try{NP.hidePreview()}catch(e){}}}
+  function show(c){var r=rect(),p=NP.preview({url:urlOf(c),title:c.name,x:r.x,y:r.y,w:r.w,h:r.h});ST.vis=true;ST.last=JSON.stringify(r);
+    if(p&&p.catch)p.catch(function(){failed(c)})}
+  function failed(c){hide();ST.on=false;ST.failed=c;hint('No se pudo reproducir aquí. Toca otra vez el canal para abrirlo con otro reproductor.')}
+  function startPreview(c){
+    webStop();S.cur=c;ST.cur=c;ST.key=key(c);ST.on=true;ST.failed=null;ST.full=false;
+    try{trk(c)}catch(e){}try{addRec(c)}catch(e){}try{if(typeof epgFor==='function')epgFor(c)}catch(e){}
+    try{var t=$$('pvT'),t2=$$('pvT2');if(t)t.textContent=c.name;if(t2)t2.textContent=c.name}catch(e){}
+    try{$$('ls').querySelectorAll('.ch.on').forEach(function(x){x.classList.remove('on')});var el=$$('ls').querySelector('[data-i="'+S.items.indexOf(c)+'"]');if(el)el.classList.add('on')}catch(e){}
+    hint('');show(c)}
+  function goFull(){var c=ST.cur;if(!c)return;ST.full=true;
+    var fav=false;try{fav=S.fav.some(function(f){return key(f)==key(c)})}catch(e){}
+    try{NP.fullscreen({on:true,title:c.name,fav:fav})}catch(e){ST.full=false}}
+  /* captura el toque/OK sobre un canal en vivo antes del manejador original */
+  $$('ls').addEventListener('click',function(e){
+    if(X.ext||!isLiveBrowse())return;
+    if(e.target.closest&&e.target.closest('#more,[data-f],[data-cx]'))return;
+    var r=e.target.closest&&e.target.closest('[data-i]');if(!r)return;
+    var c=S.items[+r.dataset.i];if(!c||c.type!=='live')return;
+    e.stopPropagation();e.preventDefault();S.fi=+r.dataset.i;
+    var k=key(c);
+    if(ST.failed&&key(ST.failed)===k){ /* el cuadro no pudo: reproductor completo con VLC/MPV de respaldo */
+      ST.failed=null;hint('');c.inl=0;c.fb=1;try{stopPv()}catch(x){}play(c);return}
+    if(ST.on&&ST.key===k){goFull();return}   /* segundo toque / doble clic = ampliar */
+    startPreview(c)},true);
+  /* tocar dos veces rápido el propio cuadro también amplía */
+  try{NP.addListener('tap',function(){if(!ST.on||ST.full)return;var n=Date.now();if(n-ST.boxTap<=500){ST.boxTap=0;goFull()}else ST.boxTap=n})}catch(e){}
+  try{NP.addListener('fullscreen',function(o){if(o&&o.on===false){ST.full=false;setTimeout(function(){try{refocus()}catch(e){}},120)}})}catch(e){}
+  try{NP.addListener('error',function(){if(ST.on&&ST.cur&&!ST.full)failed(ST.cur)})}catch(e){}
+  try{NP.addListener('fav',function(){var c=ST.cur;if(!c)return;try{togFav(c);renderBr()}catch(e){}
+    try{NP.setFav({on:S.fav.some(function(f){return key(f)==key(c)})})}catch(e){}})}catch(e){}
+  /* mantiene el video sobre el cuadro; lo oculta si cambias de pantalla o se abre algún menú encima */
+  setInterval(function(){
+    if(!ST.on||ST.full)return;
+    if(!S.cur||key(S.cur)!==ST.key||!isLiveBrowse()){hide();if(!isLiveBrowse()||!S.cur){ST.on=false;ST.cur=null}return}
+    var e=$$('pv'),r=e.getBoundingClientRect();
+    if(r.width<20||getComputedStyle(e).display==='none'){hide();return}
+    var covered=false;try{var t=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);covered=!!(t&&!e.contains(t)&&t!==e)}catch(x){}
+    if(covered){hide();return}
+    var cur=JSON.stringify(rect());
+    if(!ST.vis){show(ST.cur)}
+    else if(cur!==ST.last){ST.last=cur;var o=rect();try{NP.place({x:o.x,y:o.y,w:o.w,h:o.h})}catch(x){}}
+  },400);
+  document.addEventListener('visibilitychange',function(){if(!document.hidden&&ST.on&&!ST.full&&ST.cur){ST.vis=false;show(ST.cur)}});
+})();
+</script>
 </body>
 </html>
