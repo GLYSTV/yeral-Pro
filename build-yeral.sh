@@ -480,10 +480,30 @@ public class NativePlayerPlugin extends Plugin {
     player.addListener(new Player.Listener() {
       @Override
       public void onPlayerError(PlaybackException e) {
+        if (e.errorCode == PlaybackException.ERROR_CODE_BEHIND_LIVE_WINDOW && player != null) {
+          player.seekToDefaultPosition();
+          player.prepare();
+          return;
+        }
+        /* Igual que la pantalla completa: reintenta y prueba .m3u8 <-> .ts antes de rendirse */
+        if (cand != null && candI + 1 < cand.size() && curUrl != null && !curUrl.isEmpty()) {
+          candI++;
+          final int my = candI;
+          final String cu = curUrl;
+          new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+            if (player != null && cu.equals(curUrl) && candI == my) playCand();
+          }, 700);
+          return;
+        }
         JSObject o = new JSObject();
         o.put("message", describe(e));
         o.put("url", curUrl);
         notifyListeners("error", o);
+      }
+
+      @Override
+      public void onPlaybackStateChanged(int st) {
+        if (st == Player.STATE_READY) rememberFormat(playingUrl);
       }
     });
     pview = new PlayerView(getActivity());
@@ -583,9 +603,78 @@ public class NativePlayerPlugin extends Plugin {
           .buildUpon().clearOverridesOfType(C.TRACK_TYPE_AUDIO).build());
     } catch (Exception e) { /* opcional */ }
     updateLabels();
-    player.setMediaItem(MediaItem.fromUri(url));
+    cand = new java.util.ArrayList<>();
+    String pf = preferFormat(url);
+    cand.add(pf);
+    String al = altUrl(pf);
+    if (al != null && !al.equals(pf)) cand.add(al);
+    cand.add(pf);
+    candI = 0;
+    playCand();
+  }
+
+  private void playCand() {
+    String u = cand.get(candI);
+    playingUrl = u;
+    MediaItem.Builder mb = new MediaItem.Builder().setUri(u);
+    String mm = mimeOf(u);
+    if (!mm.isEmpty()) mb.setMimeType(mm);
+    player.setMediaItem(mb.build());
     player.prepare();
     player.play();
+  }
+
+  /* ===== Formato del canal: igual que el reproductor de pantalla completa ===== */
+  private java.util.ArrayList<String> cand;
+  private int candI = 0;
+  private String playingUrl = "";
+
+  private String extOf(String u) {
+    try {
+      String p = android.net.Uri.parse(u).getLastPathSegment();
+      return (p != null && p.contains(".")) ? p.substring(p.lastIndexOf('.') + 1) : "";
+    } catch (Exception ex) { return ""; }
+  }
+
+  private String mimeOf(String u) {
+    String x = extOf(u).toLowerCase(java.util.Locale.ROOT);
+    if (x.equals("m3u8")) return androidx.media3.common.MimeTypes.APPLICATION_M3U8;
+    return "";
+  }
+
+  private String altUrl(String u) {
+    try {
+      int q = u.indexOf('?');
+      String base = q >= 0 ? u.substring(0, q) : u;
+      String rest = q >= 0 ? u.substring(q) : "";
+      String low = base.toLowerCase(java.util.Locale.ROOT);
+      if (low.endsWith(".m3u8")) return base.substring(0, base.length() - 5) + ".ts" + rest;
+      if (low.endsWith(".ts")) return base.substring(0, base.length() - 3) + ".m3u8" + rest;
+    } catch (Exception ex) { /* opcional */ }
+    return null;
+  }
+
+  private String preferFormat(String u) {
+    try {
+      String h = android.net.Uri.parse(u).getHost();
+      String pref = h == null ? "" : getActivity().getSharedPreferences("yeral_prefs", android.content.Context.MODE_PRIVATE).getString("fmt_" + h, "");
+      String x = extOf(u).toLowerCase(java.util.Locale.ROOT);
+      if (!pref.isEmpty() && (x.equals("m3u8") || x.equals("ts")) && !x.equals(pref)) {
+        String alt = altUrl(u);
+        if (alt != null) return alt;
+      }
+    } catch (Exception ex) { /* opcional */ }
+    return u;
+  }
+
+  private void rememberFormat(String u) {
+    try {
+      if (u == null) return;
+      String x = extOf(u).toLowerCase(java.util.Locale.ROOT);
+      String h = android.net.Uri.parse(u).getHost();
+      if (h != null && (x.equals("m3u8") || x.equals("ts")))
+        getActivity().getSharedPreferences("yeral_prefs", android.content.Context.MODE_PRIVATE).edit().putString("fmt_" + h, x).apply();
+    } catch (Exception ex) { /* opcional */ }
   }
 
   /* ===== Controles de pantalla completa: Volver, Opciones, Pantalla, Favorito, Audio, Aspecto ===== */
